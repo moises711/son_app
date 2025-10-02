@@ -3,24 +3,27 @@ package com.moises.sam.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.darkColors
+//import androidx.compose.material.dynamicDarkColorScheme
+//import androidx.compose.material.dynamicLightColorScheme
+import androidx.compose.material.lightColors
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+private val DarkColors = darkColors(
+    primary = PrimaryColor,
+    secondary = SecondaryColor,
+    background = DarkBackground,
+    surface = DarkSurface,
+    onSurface = BorderWhite
 )
 
-private val LightColorScheme = lightColorScheme(
+private val LightColors = lightColors(
     primary = Purple40,
     secondary = PurpleGrey40,
-    tertiary = Pink40
+    primaryVariant = PrimaryVariant
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -35,23 +38,16 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun SamTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Siempre usamos tema oscuro para esta app
+    darkTheme: Boolean = true,
+    // No usamos colores dinámicos para mantener nuestra paleta personalizada
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
+    val colors = DarkColors
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colors = colors,
         typography = Typography,
         content = content
     )
