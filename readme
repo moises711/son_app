@@ -1,0 +1,336 @@
+# sam
+
+Aplicación Android para la gestión de trabajos de bordado y planchado.
+
+## Descripción
+
+Esta app permite registrar y controlar trabajos de bordado, planchado de chompas y planchado de ponchos, gestionando saldos, adelantos y pagos, con generación de reportes en PDF y firma digital.
+
+## Características principales
+
+- Registro de bordados y planchados con precios unitarios.
+- Visualización de saldos y adelantos.
+- Registro de pagos y adelantos.
+- Generación de PDF con firma digital.
+- Indicadores visuales de deuda y adelantos.
+- Historial de registros por cada tipo de trabajo.
+
+## Requisitos
+
+- Android Studio Hedgehog o superior
+- JDK 11 o superior
+- Gradle 8.13 o superior
+
+## Instalación
+
+1. Clona este repositorio:
+   ```bash
+   git clone https://github.com/tu-usuario/sam.git
+   ```
+2. Abre el proyecto en Android Studio.
+3. Sincroniza Gradle.
+4. Ejecuta la aplicación en un emulador o dispositivo físico.
+
+## Estructura del proyecto
+
+- `/app`: Código fuente principal de la aplicación.
+- `/gradle`: Configuración de dependencias y wrapper.
+
+# Lógica del Primer Widget: Bordado y Planchado
+
+Este documento describe el funcionamiento y la lógica detrás del primer widget de la aplicación, encargado de gestionar los servicios de bordado y planchado.
+
+---
+
+## Funcionalidad principal
+
+- Permite seleccionar entre **Bordado** y **Planchado**.
+- Permite ingresar la cantidad de servicios realizados y registrarlos.
+- Muestra el **saldo actual** y los **adelantos** en la parte superior.
+- Permite registrar adelantos y ver el historial de registros.
+- Permite generar un PDF con los registros, solicitando firma y monto de pago antes de la descarga.
+
+---
+
+## Flujo de trabajo
+
+1. **Selección de servicio**
+   - El usuario elige entre "Bordado" (S/0.50) o "Planchado" (S/1.00).
+2. **Registro de cantidad**
+   - El usuario ingresa la cantidad y presiona "Registrar".
+   - El sistema valida la cantidad y suma el monto al saldo acumulado.
+3. **Adelantos**
+   - El usuario puede registrar adelantos, que se suman al total de adelantos.
+   - Los adelantos se mantienen hasta la descarga del PDF.
+4. **Visualización**
+   - El saldo y los adelantos se muestran siempre actualizados.
+   - El usuario puede ver el historial de registros.
+5. **Descarga de PDF**
+   - Al presionar "Imprimir PDF", se abre un modal para registrar la firma.
+   - Luego, se solicita el monto de pago recibido.
+   - Se genera el PDF con la información actual.
+   - Tras la descarga:
+     - Los registros y adelantos se eliminan.
+     - El saldo pendiente (si existe) permanece visible y se acumula con futuros servicios.
+
+---
+
+## Ejemplo de cálculo de saldo
+
+Supongamos:
+- Monto total de servicios: S/100
+- Adelantos: S/20
+- Saldo anterior: S/20
+- Pago ingresado al descargar PDF: S/50
+
+Cálculo:
+1. Saldo pendiente antes del pago: 100 - 20 - 20 = 60
+2. Saldo final tras el pago: 60 - 50 = 10
+
+El saldo final (S/10) queda visible y se suma a futuros registros.
+
+---
+
+## Persistencia
+
+- El saldo pendiente se mantiene después de la descarga del PDF.
+- Los registros y adelantos se eliminan tras la descarga.
+- Toda la información se almacena localmente para evitar pérdidas de datos.
+
+---
+
+## Resumen
+
+El primer widget permite un control detallado de los servicios de bordado y planchado, gestionando registros, saldos, adelantos y pagos, y asegurando que el saldo pendiente siempre esté actualizado y visible para el usuario.
+
+# Lógica del Segundo Widget: Planchado de Chompas
+
+Este documento describe el funcionamiento y la lógica detrás del segundo widget de la aplicación, encargado de gestionar el servicio de planchado de chompas.
+
+---
+
+## Funcionalidad principal
+
+- Muestra el saldo actual pendiente por planchado de chompas (S/1.00 por unidad).
+- Permite registrar nuevas cantidades de chompas planchadas haciendo clic en cualquier parte del widget.
+- Permite registrar pagos recibidos y descuenta automáticamente del saldo pendiente.
+- Elimina o marca como completados los registros cuando el saldo llega a cero.
+- Permite ver el historial de registros realizados.
+
+---
+
+## Flujo de trabajo
+
+1. **Registro de cantidad**
+   - El usuario hace clic en el widget.
+   - Se abre un diálogo/modal para ingresar la cantidad de chompas planchadas.
+   - El sistema valida la cantidad y suma el monto correspondiente al saldo pendiente.
+
+2. **Pagos**
+   - Cuando el usuario recibe un pago, ingresa el monto recibido.
+   - El pago se descuenta del saldo pendiente.
+   - Si el saldo llega a cero, el registro desaparece de la vista principal o se marca como completado.
+
+3. **Visualización**
+   - El saldo pendiente se muestra siempre actualizado.
+   - El usuario puede acceder al historial de registros para consultar movimientos anteriores.
+
+---
+
+## Persistencia
+
+- Los registros y saldos se almacenan localmente para evitar pérdidas de información.
+- Los registros pagados completamente se eliminan o se marcan como completados y no se muestran en la vista principal.
+
+---
+
+## Resumen
+
+El segundo widget permite un control sencillo y eficiente del planchado de chompas, facilitando el registro de servicios, la gestión de pagos y el seguimiento del saldo pendiente de manera clara y actualizada para el usuario.
+
+# Lógica del Tercer Widget: Planchado de Ponchos
+
+Este documento describe el funcionamiento y la lógica detrás del tercer widget de la aplicación, encargado de gestionar el servicio de planchado de ponchos.
+
+---
+
+## Funcionalidad principal
+
+- Muestra la cantidad de ponchos que te deben o debes.
+- Calcula el saldo según la cantidad registrada (S/2.50 por poncho).
+- El color del saldo indica el estado:
+  - **Amarillo:** Te deben (saldo positivo).
+  - **Verde:** No te deben nada (saldo cero).
+  - **Rojo:** Debes (saldo negativo).
+- Permite registrar nuevas cantidades de ponchos planchados.
+- Permite registrar pagos o adelantos recibidos.
+- Permite ver el historial de registros realizados.
+
+---
+
+## Flujo de trabajo
+
+1. **Registro de cantidad**
+   - El usuario ingresa la cantidad de ponchos planchados y presiona "Registrar".
+   - El sistema valida la cantidad y suma el monto correspondiente al saldo pendiente.
+   - La cantidad total de ponchos pendientes se actualiza y se muestra en la parte superior.
+
+2. **Pagos o adelantos**
+   - El usuario puede registrar pagos o adelantos recibidos.
+   - El pago se descuenta del saldo pendiente.
+   - Si el saldo pasa a negativo, se muestra como adelanto (color azul).
+   - Si el saldo es cero, se muestra en verde.
+   - Si el saldo es positivo, se muestra en amarillo.
+   - Si el saldo es negativo (debes), se muestra en rojo.
+
+3. **Visualización**
+   - El saldo pendiente y la cantidad de ponchos se muestran siempre actualizados y con el color correspondiente.
+   - El usuario puede acceder al historial de registros para consultar movimientos anteriores.
+
+---
+
+## Persistencia
+
+- Los registros, saldos y adelantos se almacenan localmente para evitar pérdidas de información.
+- Los registros pagados completamente o con saldo cero se pueden eliminar o marcar como completados, según la lógica de la aplicación.
+
+---
+
+## Resumen
+
+El tercer widget permite un control detallado del planchado de ponchos, mostrando de forma clara el saldo y la cantidad pendiente, con indicadores visuales de estado, y facilitando el registro de servicios y pagos para mantener la información siempre actualizada y accesible para el usuario.
+
+# Barra Superior de Resumen y Actualización Automática
+
+Este documento explica cómo funciona la barra superior de resumen en la aplicación y cómo se actualizan automáticamente los datos mostrados.
+
+---
+
+## Funcionalidad de la barra superior
+
+- **Saldo general (verde):** Muestra la suma total de los saldos actuales de todos los widgets (bordado/planchado, chompas y ponchos), incluyendo cualquier saldo pendiente de registros.
+- **Ingresos de hoy (azul):** Muestra la suma de todos los pagos recibidos en la fecha actual.
+- Los valores se muestran solo como números, sin letras, y el color indica su significado.
+
+---
+
+## Actualización automática de datos
+
+- Cada vez que se registra un nuevo servicio, adelanto o pago en cualquiera de los widgets, la barra superior se actualiza automáticamente para reflejar los nuevos valores.
+- Si se elimina o completa un registro (por ejemplo, al recibir un pago total), el saldo general y los ingresos de hoy se recalculan y actualizan en tiempo real.
+- Los datos se mantienen sincronizados gracias a la gestión de estado de la aplicación, asegurando que la información mostrada siempre sea la más reciente.
+
+---
+
+## Ventajas
+
+- El usuario puede ver de un vistazo el estado financiero global de la app.
+- No es necesario actualizar manualmente: los datos siempre están al día.
+- La interfaz es más clara y moderna al usar colores para diferenciar los valores.
+
+---
+
+## Resumen
+
+La barra superior de resumen permite al usuario monitorear fácilmente el saldo general y los ingresos diarios, con actualización automática cada vez que se realiza una operación en la app. Esto mejora la experiencia y el control sobre los servicios y pagos registrados.
+
+# Visualización y generación del PDF
+
+La aplicación permite generar un PDF como comprobante o reporte de los servicios y movimientos registrados. El diseño del PDF está pensado para ser claro, ordenado y útil tanto en registros cortos como largos.
+
+---
+
+## Estructura del PDF
+
+- **Encabezado:**  
+  Nombre del reporte, fecha y hora de generación.
+
+- **Sección de Bordados:**  
+  Tabla con columnas de Fecha y Cantidad.  
+  Si hay muchos registros, la tabla se divide automáticamente en dos columnas para ahorrar espacio y mejorar la legibilidad.  
+  Ejemplo:
+
+  ```
+  ---------------------------------------------------------------
+  | Bordados                                                    |
+  ---------------------------------------------------------------
+  | Fecha      | Cantidad |     | Fecha      | Cantidad         |
+  | 10/09/25   |   20     |     | 13/09/25   |   50             |
+  | 11/09/25   |   10     |     | 14/09/25   |   15             |
+  | 12/09/25   |   30     |     | 15/09/25   |   22             |
+  ---------------------------------------------------------------
+  ```
+
+- **Sección de Planchados:**  
+  Tabla similar a la de bordados, también con división en dos columnas si hay muchos registros.
+
+- **Pagos recibidos:**  
+  Tabla con Fecha, Monto pagado y Observaciones.
+
+- **Resumen de saldos:**  
+  Cuadro en la parte inferior con los totales de bordados, planchados, saldo anterior, adelantos, pagos y saldo final.
+
+- **Firma:**  
+  Espacio para la firma digital o manuscrita.
+
+---
+
+## Notas sobre la visualización
+
+- Si la cantidad de registros es pequeña, las tablas se muestran en una sola columna.
+- Si la cantidad de registros es grande, la tabla se divide en dos columnas para facilitar la lectura, pero **no se mezclan bordados y planchados en la misma tabla**.
+- El resumen de saldos siempre aparece en la parte inferior del PDF, junto con la firma y la fecha/hora.
+
+---
+
+## Ejemplo visual (mockup)
+
+```
+---------------------------------------------------------------
+|                Reporte de Servicios - 02/10/2025            |
+---------------------------------------------------------------
+
+Bordados
+---------------------------------------------------------------
+| Fecha      | Cantidad |     | Fecha      | Cantidad         |
+| 10/09/25   |   20     |     | 13/09/25   |   50             |
+| 11/09/25   |   10     |     | 14/09/25   |   15             |
+| 12/09/25   |   30     |     | 15/09/25   |   22             |
+---------------------------------------------------------------
+
+Planchados
+---------------------------------------------------------------
+| Fecha      | Cantidad |     | Fecha      | Cantidad         |
+| 10/09/25   |   10     |     | 13/09/25   |   25             |
+| 11/09/25   |   20     |     | 14/09/25   |   18             |
+---------------------------------------------------------------
+
+Pagos recibidos
+---------------------------------------------------------------
+| Fecha      | Monto pagado | Observaciones                   |
+| 02/10/2025 |   50.00      | Pago parcial                    |
+---------------------------------------------------------------
+
+Resumen de saldos
+---------------------------------------------------------------
+Total Bordado:     S/ 55.00
+Total Planchado:   S/ 30.00
+Total General:     S/ 85.00
+Saldo anterior:    S/ 15.00
+Adelantos:         S/ 20.00
+Pago:              S/ 50.00
+Saldo final:       S/ 30.00
+---------------------------------------------------------------
+
+Firma: ___________________________
+
+Fecha y hora: 02/10/2025 10:25
+```
+
+---
+
+De esta manera, el PDF se adapta automáticamente para que la información sea clara y fácil de leer, sin importar la cantidad de registros.
+
+## Licencia
+
+[Agrega aquí la licencia de tu proyecto]
