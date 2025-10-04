@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/app_background"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Barra superior con totales -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/gradient_top_bar"
+            android:elevation="4dp"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/tv_total"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/total_label"
+                tools:ignore="TextContrastCheck"
+                android:textColor="@color/balance_green"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_hoy"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/hoy_label"
+                tools:ignore="TextContrastCheck"
+                android:textColor="@color/balance_blue"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_saldo_general"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/saldo_general_label"
+                tools:ignore="TextContrastCheck"
+                android:textColor="@color/balance_yellow"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- Card del Jefe -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_jefe"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/gradient_card_dark"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gradient_card_dark"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Header del Jefe -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/jefe"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_jefe_saldos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:text="@string/jefe_saldos"
+                        android:textColor="@color/balance_blue"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/tv_jefe_saldo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/jefe_saldo"
+                        android:textColor="@color/balance_yellow"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+                <!-- Botones superiores del Jefe -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_bordados"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_rounded_white"
+                        android:text="@string/bordados"
+                        android:textColor="@color/dark_text"
+                        android:contentDescription="@string/bordados"
+                        android:textSize="14sp"
+                        android:minHeight="48dp"
+                        tools:ignore="TextContrastCheck" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_planchados"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_rounded_white"
+                        android:text="@string/planchados"
+                        android:textColor="@color/dark_text"
+                        android:contentDescription="@string/planchados"
+                        android:textSize="14sp"
+                        android:minHeight="48dp"
+                        tools:ignore="TextContrastCheck" />
+
+                </LinearLayout>
+
+                <!-- Botones inferiores del Jefe -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_registro_jefe"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_rounded_blue"
+                        android:text="@string/registro"
+                        android:textColor="@color/white"
+                        android:contentDescription="@string/cd_registro_jefe"
+                        android:textSize="12sp"
+                        android:minHeight="48dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_descargar_pdf"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_rounded_blue"
+                        android:text="@string/descargar_pdf"
+                        android:textColor="@color/white"
+                        android:contentDescription="@string/descargar_pdf"
+                        android:textSize="12sp"
+                        android:minHeight="48dp"
+                        tools:ignore="TouchTargetSizeCheck" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_adelantos"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_rounded_blue"
+                        android:text="@string/adelantos"
+                        android:textColor="@color/white"
+                        android:contentDescription="@string/adelantos"
+                        android:textSize="12sp"
+                        android:minHeight="48dp"
+                        tools:ignore="VisualLintButtonSize" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Card de Clemente -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_clemente"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/gradient_card_dark"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gradient_card_dark"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Header de Clemente -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/clemente"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_chompas_pendientes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/chompas_pendientes"
+                            android:textColor="@color/balance_blue"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_chompas_numero"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/numero_cero"
+                            android:textColor="@color/balance_blue"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_clemente_saldo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/saldo_s_0"
+                        android:textColor="@color/balance_yellow"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+                <!-- Botones de Clemente -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_registro_clemente"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_rounded_blue"
+                        android:text="@string/registro"
+                        android:textColor="@color/white"
+                        android:contentDescription="@string/cd_registro_clemente"
+                        android:textSize="14sp"
+                        android:minHeight="48dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_pagos_clemente"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_rounded_white"
+                        android:text="@string/pagos"
+                        android:textColor="@color/dark_text"
+                        android:contentDescription="@string/cd_pagos_clemente"
+                        android:textSize="14sp"
+                        android:minHeight="48dp"
+                        tools:ignore="TextContrastCheck" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Card de Lalo -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_lalo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/gradient_card_dark"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gradient_card_dark"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- Header de Lalo -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/lalo"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_ponchos_pendientes"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/ponchos_pendientes"
+                            android:textColor="@color/balance_blue"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tv_ponchos_numero"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="@string/numero_cero"
+                            android:textColor="@color/balance_blue"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_lalo_saldo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/saldo_s_0"
+                        android:textColor="@color/balance_yellow"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+                <!-- Botones de Lalo -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_registro_lalo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_rounded_blue"
+                        android:text="@string/registro"
+                        android:textColor="@color/white"
+                        android:contentDescription="@string/cd_registro_lalo"
+                        android:textSize="14sp"
+                        android:minHeight="48dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_pagos_lalo"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_rounded_white"
+                        android:contentDescription="@string/cd_pagos_lalo"
+                        android:minHeight="48dp"
+                        android:text="@string/pagos"
+                        android:textColor="#D1C4E9"
+                        android:textSize="14sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+</ScrollView>

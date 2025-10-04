@@ -1,3 +1,36 @@
 <resources>
     <string name="app_name">sam</string>
+
+    <!-- Textos de la UI (activity_main) -->
+    <string name="total_label">total s/0.00</string>
+    <string name="hoy_label">hoy s/0.00</string>
+    <string name="saldo_general_label">saldo general s/0.00</string>
+
+    <string name="jefe">jefe</string>
+    <string name="jefe_saldos">saldos s/0.00</string>
+    <string name="jefe_saldo">saldo s/0.00</string>
+
+    <string name="bordados">bordados</string>
+    <string name="planchados">planchados</string>
+
+    <string name="registro">registro</string>
+    <string name="descargar_pdf">descargar pdf</string>
+    <string name="adelantos">adelantos</string>
+
+    <string name="clemente">clemente</string>
+    <string name="chompas_pendientes">chompas pendientes</string>
+    <string name="numero_cero">0</string>
+    <string name="saldo_s_0">saldo s/0.00</string>
+    <string name="pagos">pagos</string>
+
+    <string name="lalo">lalo</string>
+    <string name="ponchos_pendientes">ponchos pendientes</string>
+
+    <!-- Content descriptions para accesibilidad y para desambiguar etiquetas repetidas -->
+    <string name="cd_registro_jefe">Registro del jefe</string>
+    <string name="cd_registro_clemente">Registro de Clemente</string>
+    <string name="cd_registro_lalo">Registro de Lalo</string>
+    <string name="cd_pagos_clemente">Pagos de Clemente</string>
+    <string name="cd_pagos_lalo">Pagos de Lalo</string>
+
 </resources>
