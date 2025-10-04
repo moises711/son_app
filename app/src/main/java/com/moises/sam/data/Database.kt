@@ -74,6 +74,9 @@ class Converters {
  */
 @Dao
 interface RegistroDao {
+    @Query("SELECT * FROM registros")
+    suspend fun getAllRegistros(): List<RegistroEntity>
+    
     @Query("SELECT * FROM registros WHERE tipo IN ('BORDADO', 'PLANCHADO') AND isPagado = 0")
     suspend fun getRegistrosBordadoPlanchado(): List<RegistroEntity>
     
@@ -97,6 +100,9 @@ interface RegistroDao {
     
     @Query("DELETE FROM registros WHERE tipo = 'CHOMPA' AND isPagado = 0")
     suspend fun deleteAllChompasRegistros()
+    
+    @Query("DELETE FROM registros")
+    suspend fun deleteAllRegistros()
 }
 
 /**
@@ -112,6 +118,9 @@ interface PagoDao {
     
     @Insert
     suspend fun insertPago(pago: PagoEntity)
+    
+    @Query("DELETE FROM pagos")
+    suspend fun deleteAllPagos()
 }
 
 /**
@@ -127,6 +136,9 @@ interface ConfiguracionDao {
     
     @Update
     suspend fun updateConfiguracion(config: ConfiguracionEntity)
+    
+    @Query("DELETE FROM configuracion")
+    suspend fun deleteAllConfiguracion()
 }
 
 /**
@@ -284,6 +296,24 @@ class SamRepository(private val context: android.content.Context) {
             saldoPonchos = saldoPonchos,
             cantidadPonchos = cantidadPonchos
         )
-        configuracionDao.updateConfiguracion(newConfig)
+        configuracionDao.insertConfiguracion(newConfig)
+    }
+    
+    // Función para limpiar completamente todos los datos y resetear a valores por defecto
+    suspend fun limpiarTodosLosDatos() {
+        registroDao.deleteAllRegistros()
+        pagoDao.deleteAllPagos()
+        configuracionDao.deleteAllConfiguracion()
+        
+        // Insertar configuración por defecto con todos los valores en 0
+        val configPorDefecto = ConfiguracionEntity(
+            id = 1,
+            saldoBordadoPlanchado = 0.0,
+            adelantos = 0.0,
+            saldoChompas = 0.0,
+            saldoPonchos = 0.0,
+            cantidadPonchos = 0
+        )
+        configuracionDao.insertConfiguracion(configPorDefecto)
     }
 }

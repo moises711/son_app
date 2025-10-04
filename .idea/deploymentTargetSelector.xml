@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-10-02T16:25:26.112220249Z">
+        <DropdownSelection timestamp="2025-10-04T00:13:06.158455623Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=GATODISK5LDMVWDI" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=/home/sonjin/.android/avd/Medium_Phone.avd" />
             </handle>
           </Target>
         </DropdownSelection>

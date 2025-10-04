@@ -7,4 +7,31 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- Colores principales para la UI elegante -->
+    <color name="app_background">#FF0F0F0F</color>
+    <color name="card_background">#FF1A1A1A</color>
+    <color name="dark_text">#FF1A1A1A</color>
+    
+    <!-- Colores para los saldos -->
+    <color name="balance_green">#FF4CAF50</color>
+    <color name="balance_blue">#FF2196F3</color>
+    <color name="balance_yellow">#FFFF9800</color>
+    
+    <!-- Gradientes -->
+    <color name="gradient_start">#FF1A1A1A</color>
+    <color name="gradient_end">#FF2D2D2D</color>
+    <color name="gradient_top_start">#FF6B73FF</color>
+    <color name="gradient_top_end">#FF9C27B0</color>
+    
+    <!-- Botones -->
+    <color name="button_blue">#FF2196F3</color>
+    <color name="button_white">#FFFFFFFF</color>
+    <color name="button_pressed">#FF1976D2</color>
+    
+    <!-- Estados -->
+    <color name="accent_color">#FF6200EE</color>
+    <color name="error_color">#FFF44336</color>
+    <color name="success_color">#FF4CAF50</color>
+    <color name="warning_color">#FFFF9800</color>
 </resources>
