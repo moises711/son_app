@@ -6,7 +6,6 @@ import com.moises.sam.TipoServicio
 import java.util.Date
 import java.text.SimpleDateFormat
 import java.util.Locale
-import com.moises.sam.model.Pago
 
 /**
  * Entidad para registro en la base de datos
@@ -188,7 +187,7 @@ class SamRepository(private val context: android.content.Context) {
                 id = entity.id,
                 tipo = TipoServicio.valueOf(entity.tipo),
                 cantidad = entity.cantidad,
-                fecha = toDate(entity.fecha),
+                fecha = LocalDate.parse(entity.fecha, DateTimeFormatter.ISO_LOCAL_DATE),
                 total = entity.total,
                 isPagado = entity.isPagado
             )
@@ -201,7 +200,7 @@ class SamRepository(private val context: android.content.Context) {
                 id = entity.id,
                 tipo = TipoServicio.valueOf(entity.tipo),
                 cantidad = entity.cantidad,
-                fecha = toDate(entity.fecha),
+                fecha = LocalDate.parse(entity.fecha, DateTimeFormatter.ISO_LOCAL_DATE),
                 total = entity.total,
                 isPagado = entity.isPagado
             )
@@ -214,7 +213,7 @@ class SamRepository(private val context: android.content.Context) {
                 id = entity.id,
                 tipo = TipoServicio.valueOf(entity.tipo),
                 cantidad = entity.cantidad,
-                fecha = toDate(entity.fecha),
+                fecha = LocalDate.parse(entity.fecha, DateTimeFormatter.ISO_LOCAL_DATE),
                 total = entity.total,
                 isPagado = entity.isPagado
             )
@@ -226,7 +225,7 @@ class SamRepository(private val context: android.content.Context) {
             id = registro.id,
             tipo = registro.tipo.name,
             cantidad = registro.cantidad,
-            fecha = fromDate(registro.fecha),
+            fecha = registro.fecha.format(DateTimeFormatter.ISO_LOCAL_DATE),
             total = registro.total,
             isPagado = registro.isPagado
         )
@@ -246,7 +245,7 @@ class SamRepository(private val context: android.content.Context) {
         return pagoDao.getAllPagos().map { entity ->
             Pago(
                 id = entity.id,
-                fecha = toDate(entity.fecha),
+                fecha = LocalDate.parse(entity.fecha, DateTimeFormatter.ISO_LOCAL_DATE),
                 monto = entity.monto,
                 observacion = entity.observacion
             )
@@ -255,11 +254,11 @@ class SamRepository(private val context: android.content.Context) {
     
     suspend fun getPagosDiarios(): List<Pago> {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val hoy = dateFormat.format(Date())
+    val hoy = dateFormat.format(Date())
         return pagoDao.getPagosDesde(hoy).map { entity ->
             Pago(
                 id = entity.id,
-                fecha = toDate(entity.fecha),
+                fecha = LocalDate.parse(entity.fecha, DateTimeFormatter.ISO_LOCAL_DATE),
                 monto = entity.monto,
                 observacion = entity.observacion
             )
@@ -269,7 +268,7 @@ class SamRepository(private val context: android.content.Context) {
     suspend fun savePago(pago: Pago) {
         val entity = PagoEntity(
             id = pago.id,
-            fecha = fromDate(pago.fecha),
+            fecha = pago.fecha.format(DateTimeFormatter.ISO_LOCAL_DATE),
             monto = pago.monto,
             observacion = pago.observacion
         )
@@ -319,16 +318,5 @@ class SamRepository(private val context: android.content.Context) {
             cantidadPonchos = 0
         )
         configuracionDao.insertConfiguracion(configPorDefecto)
-    }
-    
-    // Funciones de ayuda para formateo de Date
-    private fun fromDate(date: Date): String {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return dateFormat.format(date)
-    }
-    
-    private fun toDate(dateString: String): Date {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return dateFormat.parse(dateString) ?: Date()
     }
 }
