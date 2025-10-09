@@ -337,10 +337,10 @@ class MainActivity : AppCompatActivity() {
     private fun registrarServicio(tipo: TipoServicio, cantidad: Int) {
         // Calcular monto según tipo de servicio
         val monto = when (tipo) {
-            TipoServicio.BORDADO -> 2.0 * cantidad
-            TipoServicio.PLANCHADO -> 0.5 * cantidad
+            TipoServicio.BORDADO -> 0.5 * cantidad
+            TipoServicio.PLANCHADO -> 1.0 * cantidad
             TipoServicio.CHOMPA -> 1.0 * cantidad
-            TipoServicio.PONCHO -> 5.0 * cantidad
+            TipoServicio.PONCHO -> 2.5 * cantidad
         }
         
         lifecycleScope.launch {
@@ -390,40 +390,42 @@ class MainActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     // Jefe (Bordado y Planchado)
                     tvJefeSaldos.text = "BP: S/ ${String.format("%.2f", saldoBordadoPlanchado)}"
-                    
                     val jefeSaldoFinal = saldoBordadoPlanchado - config.adelantos
                     tvJefeSaldo.text = "Saldo: S/ ${String.format("%.2f", jefeSaldoFinal)}"
                     if (jefeSaldoFinal > 0) {
-                        tvJefeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme)) // Amarillo: te deben
+                        tvJefeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
                     } else if (jefeSaldoFinal < 0) {
-                        tvJefeSaldo.setTextColor(resources.getColor(R.color.error_color, theme)) // Rojo: debes
+                        tvJefeSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
                     } else {
-                        tvJefeSaldo.setTextColor(resources.getColor(R.color.success_color, theme)) // Verde: saldo cero
+                        tvJefeSaldo.setTextColor(resources.getColor(R.color.success_color, theme))
                     }
-                    
+
                     // Chompas (Clemente)
                     tvChompasNumero.text = registrosChompas.size.toString()
-                    
                     tvClementeSaldo.text = "Saldo: S/ ${String.format("%.2f", saldoChompas)}"
                     if (saldoChompas > 0) {
-                        tvClementeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme)) // Amarillo: te deben
+                        tvClementeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
                     } else if (saldoChompas < 0) {
-                        tvClementeSaldo.setTextColor(resources.getColor(R.color.error_color, theme)) // Rojo: debes
+                        tvClementeSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
                     } else {
-                        tvClementeSaldo.setTextColor(resources.getColor(R.color.success_color, theme)) // Verde: saldo cero
+                        tvClementeSaldo.setTextColor(resources.getColor(R.color.success_color, theme))
                     }
-                    
+
                     // Ponchos (Lalo)
                     tvPonchosNumero.text = registrosPonchos.size.toString()
-                    
                     tvLaloSaldo.text = "Saldo: S/ ${String.format("%.2f", saldoPonchos)}"
                     if (saldoPonchos > 0) {
-                        tvLaloSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme)) // Amarillo: te deben
+                        tvLaloSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
                     } else if (saldoPonchos < 0) {
-                        tvLaloSaldo.setTextColor(resources.getColor(R.color.error_color, theme)) // Rojo: debes
+                        tvLaloSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
                     } else {
-                        tvLaloSaldo.setTextColor(resources.getColor(R.color.success_color, theme)) // Verde: saldo cero
+                        tvLaloSaldo.setTextColor(resources.getColor(R.color.success_color, theme))
                     }
+
+                    // Saldo general (suma de todos los saldos)
+                    val saldoGeneral = jefeSaldoFinal + saldoChompas + saldoPonchos
+                    val tvSaldoGeneral = findViewById<TextView>(R.id.tv_saldo_general)
+                    tvSaldoGeneral.text = "Saldo general: S/ ${String.format("%.2f", saldoGeneral)}"
                 }
             } catch (e: Exception) {
                 Log.e("MainActivity", "Error al actualizar saldos", e)
