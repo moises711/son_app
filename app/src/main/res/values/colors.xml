@@ -14,15 +14,15 @@
     <color name="dark_text">#FF1A1A1A</color>
     
     <!-- Colores para los saldos -->
-    <color name="balance_green">#FF4CAF50</color>
-    <color name="balance_blue">#FF2196F3</color>
-    <color name="balance_yellow">#FFFF9800</color>
+    <color name="balance_green">#FF06B6D4</color>
+    <color name="balance_blue">#FF3B82F6</color>
+    <color name="balance_yellow">#FF0EA5E9</color>
     
     <!-- Gradientes -->
     <color name="gradient_start">#FF1A1A1A</color>
     <color name="gradient_end">#FF2D2D2D</color>
-    <color name="gradient_top_start">#FF6B73FF</color>
-    <color name="gradient_top_end">#FF9C27B0</color>
+    <color name="gradient_top_start">#FF0F172A</color>
+    <color name="gradient_top_end">#FF1E3A8A</color>
     
     <!-- Botones -->
     <color name="button_blue">#FF2196F3</color>
@@ -34,4 +34,8 @@
     <color name="error_color">#FFF44336</color>
     <color name="success_color">#FF4CAF50</color>
     <color name="warning_color">#FFFF9800</color>
+    
+    <!-- Tabla -->
+    <color name="table_row_even">#33FFFFFF</color>
+    <color name="table_row_odd">#22FFFFFF</color>
 </resources>

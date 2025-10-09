@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">sam</string>
+    <string name="app_name"></string>
 
     <!-- Textos de la UI (activity_main) -->
     <string name="total_label">total s/0.00</string>
@@ -13,7 +13,7 @@
     <string name="bordados">bordados</string>
     <string name="planchados">planchados</string>
 
-    <string name="registro">registro</string>
+    <string name="registro">ver registros</string>
     <string name="descargar_pdf">descargar pdf</string>
     <string name="adelantos">adelantos</string>
 
@@ -27,10 +27,22 @@
     <string name="ponchos_pendientes">ponchos pendientes</string>
 
     <!-- Content descriptions para accesibilidad y para desambiguar etiquetas repetidas -->
-    <string name="cd_registro_jefe">Registro del jefe</string>
-    <string name="cd_registro_clemente">Registro de Clemente</string>
-    <string name="cd_registro_lalo">Registro de Lalo</string>
+    <string name="cd_registro_jefe">Ver registros del jefe</string>
+    <string name="cd_registro_clemente">Ver registros de Clemente</string>
+    <string name="cd_registro_lalo">Ver registros de Lalo</string>
     <string name="cd_pagos_clemente">Pagos de Clemente</string>
     <string name="cd_pagos_lalo">Pagos de Lalo</string>
+
+    <!-- Textos para diálogos y registros -->
+    <string name="registrar_servicio">Registrar Servicio</string>
+    <string name="cantidad">Cantidad</string>
+    <string name="registrar">Registrar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="no_hay_registros">No hay registros disponibles</string>
+    <string name="cerrar">Cerrar</string>
+    <string name="add_new_record">Añadir nuevo registro</string>
+    <string name="select_service_type">Seleccione tipo de servicio</string>
+    <string name="select_service">Seleccionar servicio</string>
+    <string name="precio_unitario">Precio unitario: S/ 0.00</string>
 
 </resources>

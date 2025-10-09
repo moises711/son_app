@@ -12,7 +12,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.moises.sam.model.Pago
 import com.moises.sam.model.Registro
-import com.moises.sam.TipoServicio
+import com.moises.sam.model.TipoServicio
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -49,6 +49,292 @@ class PdfGenerator(private val context: Context) {
         private const val SUBTITLE_TEXT_SIZE = 16f
         private const val NORMAL_TEXT_SIZE = 12f
         private const val LINE_HEIGHT = 20f
+    }
+    
+    /**
+     * Genera un PDF con los registros y pagos usando la lógica matemática especificada
+     */
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun generarInformePDF(
+        registros: List<Registro>,
+        pagos: List<Pago>,
+        saldoAnterior: Double = 0.0,
+        adelantos: Double = 0.0,
+        pagosTotal: Double = 0.0,
+        saldoFinal: Double = 0.0
+    ): File? {
+        Log.i(TAG, "=== INICIANDO GENERACIÓN DE INFORME PDF ===")
+        Log.d(TAG, "Registros: ${registros.size}")
+        Log.d(TAG, "Pagos: ${pagos.size}")
+        Log.d(TAG, "Saldo anterior: $saldoAnterior")
+        Log.d(TAG, "Adelantos: $adelantos")
+        Log.d(TAG, "Pagos totales: $pagosTotal")
+        Log.d(TAG, "Saldo final calculado: $saldoFinal")
+        
+        try {
+            Log.d(TAG, "Creando documento PDF...")
+            val document = PdfDocument()
+            val pageInfo = PdfDocument.PageInfo.Builder(PAGE_WIDTH, PAGE_HEIGHT, 1).create() // A4
+            val page = document.startPage(pageInfo)
+            val canvas = page.canvas
+            
+            Log.d(TAG, "Página creada exitosamente")
+        
+            // Fondo negro
+            canvas.drawRGB(18, 18, 18) // Color negro
+            
+            val paint = Paint().apply {
+                color = Color.WHITE
+                textSize = NORMAL_TEXT_SIZE
+                isAntiAlias = true
+            }
+            
+            val boldPaint = Paint().apply {
+                color = Color.WHITE
+                textSize = NORMAL_TEXT_SIZE
+                typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                isAntiAlias = true
+            }
+            
+            // Título
+            boldPaint.textSize = HEADER_TEXT_SIZE
+            val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+            val title = "INFORME DE CIERRE - ${dateFormatter.format(Date())}"
+            canvas.drawText(title, MARGIN_LEFT, 50f, boldPaint)
+            
+            // Separador
+            paint.strokeWidth = 2f
+            canvas.drawLine(MARGIN_LEFT, 60f, MARGIN_RIGHT, 60f, paint)
+            
+            // Agrupar registros por tipo de servicio
+            val registrosPorTipo: Map<TipoServicio, List<Registro>> = registros.groupBy { it.tipo }
+            
+            var y = 90f
+            var totalGeneralServicios = 0.0
+            
+            // Sección: Saldo Anterior
+            boldPaint.textSize = SUBTITLE_TEXT_SIZE
+            canvas.drawText("SALDO ANTERIOR", MARGIN_LEFT, y, boldPaint)
+            y += 25f
+            
+            canvas.drawText("Saldo del período anterior: S/ ${String.format(Locale.US, "%.2f", saldoAnterior)}", MARGIN_LEFT + 20f, y, paint)
+            
+            y += 30f
+            
+            // Iterar por cada tipo de servicio
+            registrosPorTipo.forEach { entry: Map.Entry<TipoServicio, List<Registro>> ->
+                val tipoServicio = entry.key
+                val registrosTipo = entry.value
+                boldPaint.textSize = SUBTITLE_TEXT_SIZE
+                canvas.drawText(tipoServicio.nombre.uppercase(), MARGIN_LEFT, y, boldPaint)
+                
+                y += 10f
+                paint.strokeWidth = 1f
+                canvas.drawLine(MARGIN_LEFT, y, MARGIN_RIGHT, y, paint)
+                
+                // Cabecera de tabla
+                y += 20f
+                boldPaint.textSize = NORMAL_TEXT_SIZE
+                canvas.drawText("FECHA", MARGIN_LEFT + 10f, y, boldPaint)
+                canvas.drawText("CANT.", MARGIN_LEFT + 110f, y, boldPaint)
+                canvas.drawText("PRECIO", MARGIN_LEFT + 170f, y, boldPaint)
+                canvas.drawText("TOTAL", MARGIN_LEFT + 250f, y, boldPaint)
+                
+                // Datos
+                y += 20f
+                val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
+                for (registro in registrosTipo) {
+                    canvas.drawText(
+                        dateFormat.format(registro.fecha),
+                        MARGIN_LEFT + 10f, y, paint
+                    )
+                    canvas.drawText(registro.cantidad.toString(), MARGIN_LEFT + 110f, y, paint)
+                    canvas.drawText(
+                        "S/ " + String.format(Locale.US, "%.2f", registro.precioUnitario),
+                        MARGIN_LEFT + 170f, y, paint
+                    )
+                    canvas.drawText(
+                        "S/ " + String.format(Locale.US, "%.2f", registro.total),
+                        MARGIN_LEFT + 250f, y, paint
+                    )
+                    y += LINE_HEIGHT
+                }
+                
+                // Total por tipo de servicio
+                val totalTipo = registrosTipo.sumOf { it.total }
+                val cantidadTipo = registrosTipo.sumOf { it.cantidad }
+                totalGeneralServicios += totalTipo
+                
+                // Línea de subtotal
+                y += 5f
+                paint.strokeWidth = 1f
+                canvas.drawLine(MARGIN_LEFT + 10f, y - 10f, MARGIN_LEFT + 300f, y - 10f, paint)
+                
+                boldPaint.textSize = NORMAL_TEXT_SIZE
+                canvas.drawText(
+                    "TOTAL ${tipoServicio.nombre.uppercase()}: $cantidadTipo unid.   S/ ${String.format(Locale.US, "%.2f", totalTipo)}",
+                    MARGIN_LEFT + 10f, y, boldPaint
+                )
+                
+                y += 40f
+            }
+            
+            // Resumen general de servicios
+            boldPaint.textSize = SUBTITLE_TEXT_SIZE
+            canvas.drawText("RESUMEN GENERAL", MARGIN_LEFT, y, boldPaint)
+            y += 25f
+            
+            // Tabla de resumen
+            val boxWidth = 400f
+            paint.textAlign = Paint.Align.LEFT
+            
+            // Servicios actuales
+            canvas.drawText("Servicios actuales:   S/ ${String.format(Locale.US, "%.2f", totalGeneralServicios)}", MARGIN_LEFT + 10f, y, paint)
+            y += LINE_HEIGHT
+            
+            // Saldo anterior
+            canvas.drawText("Saldo anterior:       S/ ${String.format(Locale.US, "%.2f", saldoAnterior)}", MARGIN_LEFT + 10f, y, paint)
+            y += LINE_HEIGHT
+            
+            // Primera línea divisoria
+            paint.strokeWidth = 1f
+            canvas.drawLine(MARGIN_LEFT + 10f, y - 5f, MARGIN_LEFT + 300f, y - 5f, paint)
+            
+            // Total a cobrar (servicios actuales + saldo anterior)
+            val totalACobrar = totalGeneralServicios + saldoAnterior
+            boldPaint.textSize = NORMAL_TEXT_SIZE
+            canvas.drawText("Total a cobrar:      S/ ${String.format(Locale.US, "%.2f", totalACobrar)}", MARGIN_LEFT + 10f, y, boldPaint)
+            y += LINE_HEIGHT * 1.5f
+            
+            // Deducciones (adelantos y pagos)
+            canvas.drawText("Adelantos:           S/ ${String.format(Locale.US, "%.2f", adelantos)}", MARGIN_LEFT + 10f, y, paint)
+            y += LINE_HEIGHT
+            
+            canvas.drawText("Pagos realizados:    S/ ${String.format(Locale.US, "%.2f", pagosTotal)}", MARGIN_LEFT + 10f, y, paint)
+            y += LINE_HEIGHT
+            
+            // Segunda línea divisoria
+            paint.strokeWidth = 1f
+            canvas.drawLine(MARGIN_LEFT + 10f, y - 5f, MARGIN_LEFT + 300f, y - 5f, paint)
+            
+            // Saldo final (total a cobrar - adelantos - pagos)
+            boldPaint.textSize = NORMAL_TEXT_SIZE
+            canvas.drawText("SALDO FINAL:        S/ ${String.format(Locale.US, "%.2f", saldoFinal)}", MARGIN_LEFT + 10f, y, boldPaint)
+            y += LINE_HEIGHT * 2
+            
+            // Detalle de pagos
+            if (pagos.isNotEmpty()) {
+                boldPaint.textSize = SUBTITLE_TEXT_SIZE
+                canvas.drawText("DETALLE DE PAGOS", MARGIN_LEFT, y, boldPaint)
+                y += 20f
+                
+                // Cabecera de tabla
+                boldPaint.textSize = NORMAL_TEXT_SIZE
+                canvas.drawText("FECHA", MARGIN_LEFT + 10f, y, boldPaint)
+                canvas.drawText("MONTO", MARGIN_LEFT + 110f, y, boldPaint)
+                canvas.drawText("OBSERVACIÓN", MARGIN_LEFT + 170f, y, boldPaint)
+                y += 20f
+                
+                // Datos de pagos
+                val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
+                for (pago in pagos) {
+                    canvas.drawText(
+                        dateFormat.format(pago.fecha),
+                        MARGIN_LEFT + 10f, y, paint
+                    )
+                    canvas.drawText(
+                        "S/ " + String.format(Locale.US, "%.2f", pago.monto),
+                        MARGIN_LEFT + 110f, y, paint
+                    )
+                    canvas.drawText(
+                        pago.observacion,
+                        MARGIN_LEFT + 170f, y, paint
+                    )
+                    y += LINE_HEIGHT
+                }
+            }
+            
+            // Nota sobre el saldo
+            y += 30f
+            paint.textSize = NORMAL_TEXT_SIZE
+            canvas.drawText("Nota: El saldo final se considerará como saldo inicial en el próximo período", MARGIN_LEFT, y, paint)
+            
+            // Firma
+            y += 40f
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 1f
+            val firmaBoxWidth = 200f
+            val firmaBoxHeight = 80f
+            val firmaX = (MARGIN_RIGHT - MARGIN_LEFT - firmaBoxWidth) / 2 + MARGIN_LEFT
+            canvas.drawRect(firmaX, y, firmaX + firmaBoxWidth, y + firmaBoxHeight, paint)
+            paint.style = Paint.Style.FILL
+            
+            // Texto de firma
+            y += firmaBoxHeight + 15f
+            paint.textAlign = Paint.Align.CENTER
+            canvas.drawText("Firma de conformidad", PAGE_WIDTH / 2f, y, paint)
+            paint.textAlign = Paint.Align.LEFT
+            
+            // Fecha y hora de generación
+            y += 30f
+            val now = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+            canvas.drawText("Generado el: $now", MARGIN_LEFT, y, paint)
+            
+            document.finishPage(page)
+            Log.d(TAG, "Páginas del informe generadas exitosamente")
+            
+            // Guardar el documento
+            Log.d(TAG, "Preparando para guardar el PDF...")
+            val directory = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            Log.d(TAG, "Directorio de destino: ${directory?.absolutePath}")
+            
+            if (directory == null) {
+                Log.e(TAG, "Error: No se pudo obtener el directorio de documentos")
+                document.close()
+                return null
+            }
+            
+            if (!directory.exists()) {
+                Log.d(TAG, "Creando directorio: ${directory.absolutePath}")
+                val created = directory.mkdirs()
+                Log.d(TAG, "Directorio creado: $created")
+            }
+            
+            val fileNameFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+            val fileName = "informe_${fileNameFormat.format(Date())}.pdf"
+            val file = File(directory, fileName)
+            Log.d(TAG, "Ruta completa del PDF: ${file.absolutePath}")
+            
+            try {
+                Log.d(TAG, "Escribiendo archivo PDF...")
+                FileOutputStream(file).use {
+                    document.writeTo(it)
+                }
+                document.close()
+                Log.i(TAG, "PDF generado exitosamente en: ${file.absolutePath}")
+                Log.i(TAG, "Tamaño del archivo: ${file.length()} bytes")
+                
+                // Verificar que el archivo se creó correctamente
+                if (file.exists() && file.length() > 0) {
+                    Log.i(TAG, "Verificación exitosa: El archivo PDF existe y tiene contenido")
+                    return file
+                } else {
+                    Log.e(TAG, "Error: El archivo PDF no se creó correctamente o está vacío")
+                    return null
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error al guardar el PDF: ${e.message}", e)
+                Log.e(TAG, "Tipo de excepción: ${e.javaClass.simpleName}")
+                document.close()
+                return null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error durante la generación del PDF: ${e.message}", e)
+            Log.e(TAG, "Tipo de excepción: ${e.javaClass.simpleName}")
+            return null
+        } finally {
+            Log.i(TAG, "=== FINALIZANDO GENERACIÓN DE INFORME PDF ===")
+        }
     }
     
     /**

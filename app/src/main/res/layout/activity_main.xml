@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/app_background"
+    android:fitsSystemWindows="true"
     tools:context=".MainActivity">
+
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="24dp"
+    android:clipToPadding="false">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:background="@drawable/gradient_top_bar"
-            android:elevation="4dp"
+            android:elevation="8dp"
             android:orientation="horizontal"
             android:padding="16dp">
 
@@ -30,10 +37,13 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/total_label"
-                tools:ignore="TextContrastCheck"
                 android:textColor="@color/balance_green"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:shadowColor="@color/black"
+                android:shadowRadius="2"
+                android:shadowDx="1"
+                android:shadowDy="1" />
 
             <TextView
                 android:id="@+id/tv_hoy"
@@ -42,10 +52,13 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/hoy_label"
-                tools:ignore="TextContrastCheck"
                 android:textColor="@color/balance_blue"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:shadowColor="@color/black"
+                android:shadowRadius="2"
+                android:shadowDx="1"
+                android:shadowDy="1" />
 
             <TextView
                 android:id="@+id/tv_saldo_general"
@@ -54,10 +67,13 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/saldo_general_label"
-                tools:ignore="TextContrastCheck"
                 android:textColor="@color/balance_yellow"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:shadowColor="@color/black"
+                android:shadowRadius="2"
+                android:shadowDx="1"
+                android:shadowDy="1" />
 
         </LinearLayout>
 
@@ -424,3 +440,16 @@
     </LinearLayout>
 
 </ScrollView>
+
+<com.google.android.material.floatingactionbutton.FloatingActionButton
+    android:id="@+id/fab_add"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom|end"
+    android:layout_margin="16dp"
+    android:contentDescription="@string/add_new_record"
+    app:srcCompat="@android:drawable/ic_input_add"
+    app:backgroundTint="@color/purple_500"
+    app:tint="@color/white" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

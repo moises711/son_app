@@ -7,25 +7,38 @@
     android:padding="24dp"
     android:gravity="center">
 
+    <TextView
+        android:id="@+id/tvDialogTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
     <EditText
         android:id="@+id/etCantidadPago"
-        android:layout_width="120dp"
-        android:layout_height="40dp"
+        android:layout_width="150dp"
+        android:layout_height="50dp"
         android:background="@drawable/edittext_border"
         android:gravity="center"
-        android:inputType="number"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
+        android:inputType="number|numberDecimal"
+        android:textColor="@android:color/white"
+        android:textColorHint="@android:color/darker_gray"
+        android:textSize="20sp"
+        android:padding="8dp"
         android:hint="Cantidad" />
 
     <Button
         android:id="@+id/btnRegistrarPago"
-        android:layout_width="160dp"
-        android:layout_height="40dp"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/button_border"
-        android:text="registrar"
-        android:textColor="@android:color/black"
+        android:text="REGISTRAR"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
         android:textSize="16sp" />
 
 </LinearLayout>

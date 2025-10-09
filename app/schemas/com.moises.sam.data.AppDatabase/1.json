@@ -2,16 +2,22 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "e5d28ec55f6752859af926da0a102636",
+    "identityHash": "2be10be591cb7e2b93f9893fc6dea8d5",
     "entities": [
       {
         "tableName": "registros",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `tipo` TEXT NOT NULL, `cantidad` INTEGER NOT NULL, `fecha` TEXT NOT NULL, `total` REAL NOT NULL, `isPagado` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha` TEXT NOT NULL, `tipo` TEXT NOT NULL, `cantidad` INTEGER NOT NULL, `monto` REAL NOT NULL, `isPagado` INTEGER NOT NULL, `tipoBordado` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -27,14 +33,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "fecha",
-            "columnName": "fecha",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "total",
-            "columnName": "total",
+            "fieldPath": "monto",
+            "columnName": "monto",
             "affinity": "REAL",
             "notNull": true
           },
@@ -43,6 +43,11 @@
             "columnName": "isPagado",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "tipoBordado",
+            "columnName": "tipoBordado",
+            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -50,9 +55,7 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
         "tableName": "pagos",
@@ -88,24 +91,16 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
       },
       {
-        "tableName": "configuracion",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `saldoBordadoPlanchado` REAL NOT NULL, `adelantos` REAL NOT NULL, `saldoChompas` REAL NOT NULL, `saldoPonchos` REAL NOT NULL, `cantidadPonchos` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "tableName": "configuraciones",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `adelantos` REAL NOT NULL, `ultimaModificacion` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "saldoBordadoPlanchado",
-            "columnName": "saldoBordadoPlanchado",
-            "affinity": "REAL",
             "notNull": true
           },
           {
@@ -115,21 +110,9 @@
             "notNull": true
           },
           {
-            "fieldPath": "saldoChompas",
-            "columnName": "saldoChompas",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "saldoPonchos",
-            "columnName": "saldoPonchos",
-            "affinity": "REAL",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cantidadPonchos",
-            "columnName": "cantidadPonchos",
-            "affinity": "INTEGER",
+            "fieldPath": "ultimaModificacion",
+            "columnName": "ultimaModificacion",
+            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -138,15 +121,48 @@
           "columnNames": [
             "id"
           ]
-        },
-        "indices": [],
-        "foreignKeys": []
+        }
+      },
+      {
+        "tableName": "adelantos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha` TEXT NOT NULL, `monto` REAL NOT NULL, `observacion` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "monto",
+            "columnName": "monto",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observacion",
+            "columnName": "observacion",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
       }
     ],
-    "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e5d28ec55f6752859af926da0a102636')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2be10be591cb7e2b93f9893fc6dea8d5')"
     ]
   }
 }

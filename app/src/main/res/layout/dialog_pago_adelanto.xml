@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/bg_modal_black">
+
+    <TextView
+        android:id="@+id/tv_pago_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Registrar Pago"
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Monto"
+        app:hintTextColor="@color/balance_blue"
+        android:textColorHint="@color/balance_blue"
+        app:boxStrokeColor="@color/balance_blue"
+        android:layout_marginBottom="16dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_pago_monto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:textColor="@color/white"
+            android:backgroundTint="#33FFFFFF" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Observación (opcional)"
+        app:hintTextColor="@color/balance_blue"
+        android:textColorHint="@color/balance_blue"
+        app:boxStrokeColor="@color/balance_blue"
+        android:layout_marginBottom="16dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/et_pago_observacion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:textColor="@color/white"
+            android:backgroundTint="#33FFFFFF" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <RadioGroup
+        android:id="@+id/rg_tipo_pago"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <RadioButton
+            android:id="@+id/rb_pago"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pago"
+            android:textColor="@color/white"
+            android:checked="true"
+            android:layout_weight="1"/>
+
+        <RadioButton
+            android:id="@+id/rb_adelanto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Adelanto"
+            android:textColor="@color/white"
+            android:layout_weight="1"/>
+
+    </RadioGroup>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_pago_cancelar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Cancelar"
+            android:textColor="@color/white"
+            android:background="@drawable/button_rounded_blue"
+            android:layout_marginEnd="4dp" />
+
+        <Button
+            android:id="@+id/btn_pago_registrar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Registrar"
+            android:textColor="@color/white"
+            android:background="@drawable/button_accent_gradient"
+            android:layout_marginStart="4dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.moises.sam"
-        minSdk = 24
+        minSdk = 26  // Actualizado a Android 8.0 (Oreo) para compatibilidad con dependencias
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -55,9 +55,20 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.coordinatorlayout)
     
     // Material Design
     implementation(libs.material)
+
+    // Seguridad (EncryptedSharedPreferences, MasterKey)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    // Apache POI para Excel (versión compatible con Android)
+    // Comentada temporalmente hasta resolver problema de dependencia
+    // implementation("com.github.SUPERCILEX:poi-android:3.17.0")
+
+    // Gráficos (MPAndroidChart)
+    implementation("com.github.PhilJay:MPAndroidChart:3.1.0")
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.cardview           )
     

@@ -1,7 +1,7 @@
 package com.moises.sam.model
 
-import com.moises.sam.TipoServicio
-import com.moises.sam.TipoBordado
+import com.moises.sam.model.TipoServicio
+import com.moises.sam.model.TipoBordado
 import java.util.Date
 
 data class Registro(
