@@ -26,6 +26,7 @@ import com.moises.sam.model.Adelanto
 import com.moises.sam.model.Pago
 import com.moises.sam.model.Registro
 import com.moises.sam.model.TipoBordado
+import com.moises.sam.model.toRegistro
 import com.moises.sam.model.TipoServicio
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,6 +36,79 @@ import java.util.Date
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
+    /**
+     * Muestra un diálogo con los registros en una tabla según el tipo de servicio
+     */
+    private fun mostrarDialogoVerRegistros(tipoServicio: TipoServicio) {
+        val builder = AlertDialog.Builder(this)
+        val view = layoutInflater.inflate(R.layout.dialog_ver_registros, null)
+        builder.setView(view)
+
+        val dialog = builder.create()
+        val tableLayout = view.findViewById<TableLayout>(R.id.table_registros)
+        val tvNoRecords = view.findViewById<TextView>(R.id.tv_no_records)
+        val btnClose = view.findViewById<Button>(R.id.btn_close)
+        val tvTitle = view.findViewById<TextView>(R.id.tv_dialog_title)
+
+        // Título según tipo
+        tvTitle.text = when (tipoServicio) {
+            TipoServicio.BORDADO, TipoServicio.PLANCHADO -> "Registros de Bordado/Planchado"
+            TipoServicio.CHOMPA -> "Registros de Chompas"
+            TipoServicio.PONCHO -> "Registros de Ponchos"
+        }
+
+        // Cargar registros según tipo
+        lifecycleScope.launch {
+            val registros: List<com.moises.sam.model.Registro> = withContext(Dispatchers.IO) {
+                when (tipoServicio) {
+                    TipoServicio.BORDADO, TipoServicio.PLANCHADO -> repository.getRegistrosBordadoPlanchado()
+                    TipoServicio.CHOMPA -> repository.getRegistrosChompas()
+                    TipoServicio.PONCHO -> repository.getRegistrosPonchos()
+                }.map { it.toRegistro() }
+            }
+
+            withContext(Dispatchers.Main) {
+                // Eliminar filas previas (excepto encabezado)
+                while (tableLayout.childCount > 1) {
+                    tableLayout.removeViewAt(1)
+                }
+
+                if (registros.isEmpty()) {
+                    tvNoRecords.visibility = View.VISIBLE
+                } else {
+                    tvNoRecords.visibility = View.GONE
+                    val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
+                    registros.forEach { registro ->
+                        val row = TableRow(this@MainActivity)
+                        val tvFecha = TextView(this@MainActivity)
+                        val tvTipo = TextView(this@MainActivity)
+                        val tvCantidad = TextView(this@MainActivity)
+                        val tvMonto = TextView(this@MainActivity)
+
+                        tvFecha.text = dateFormat.format(registro.fecha)
+                        tvTipo.text = registro.tipo.name
+                        tvCantidad.text = registro.cantidad.toString()
+                        tvMonto.text = String.format(Locale.getDefault(), "%.2f", registro.total)
+
+                        tvFecha.setTextColor(resources.getColor(R.color.white, theme))
+                        tvTipo.setTextColor(resources.getColor(R.color.white, theme))
+                        tvCantidad.setTextColor(resources.getColor(R.color.white, theme))
+                        tvMonto.setTextColor(resources.getColor(R.color.white, theme))
+
+                        row.addView(tvFecha)
+                        row.addView(tvTipo)
+                        row.addView(tvCantidad)
+                        row.addView(tvMonto)
+
+                        tableLayout.addView(row)
+                    }
+                }
+            }
+        }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+    }
     
     // Repositorio para acceder a datos
     private lateinit var repository: SamRepository
@@ -128,7 +202,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Bordado registrado: $cantidad", Toast.LENGTH_SHORT).show()
             }
         }
-        
+
         // MODAL: Registro de planchado para Jefe
         btnPlanchados.setOnClickListener {
             mostrarDialogoRegistroServicio(TipoServicio.PLANCHADO) { cantidad ->
@@ -136,24 +210,22 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Planchado registrado: $cantidad", Toast.LENGTH_SHORT).show()
             }
         }
-        
+
+        // MODAL: Ver registros de jefe (bordado/planchado)
+        btnRegistroJefe.setOnClickListener {
+            mostrarDialogoVerRegistros(TipoServicio.BORDADO)
+        }
+
         // MODAL: Registro de chompa para clemente
         btnRegistroClemente.setOnClickListener {
-            mostrarDialogoRegistroServicio(TipoServicio.CHOMPA) { cantidad ->
-                // Implementar lógica para registro de chompa
-                registrarServicio(TipoServicio.CHOMPA, cantidad)
-                Toast.makeText(this, "Chompa registrada: $cantidad", Toast.LENGTH_SHORT).show()
-            }
+            mostrarDialogoVerRegistros(TipoServicio.CHOMPA)
         }
-        
+
         // MODAL: Registro de poncho para Lalo
         btnRegistroLalo.setOnClickListener {
-            mostrarDialogoRegistroServicio(TipoServicio.PONCHO) { cantidad ->
-                registrarServicio(TipoServicio.PONCHO, cantidad)
-                Toast.makeText(this, "Poncho registrado: $cantidad", Toast.LENGTH_SHORT).show()
-            }
+            mostrarDialogoVerRegistros(TipoServicio.PONCHO)
         }
-        
+
         // MODAL: Adelantos para Jefe
         btnAdelantos.setOnClickListener {
             mostrarDialogoAdelantos()
