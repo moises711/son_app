@@ -35,6 +35,8 @@
 
     <!-- Textos para diálogos y registros -->
     <string name="registrar_servicio">Registrar Servicio</string>
+    <string name="registrar_servicio_clemente">Registrar servicio Clemente</string>
+    <string name="registrar_servicio_lalo">Registrar servicio Lalo</string>
     <string name="cantidad">Cantidad</string>
     <string name="registrar">Registrar</string>
     <string name="cancelar">Cancelar</string>

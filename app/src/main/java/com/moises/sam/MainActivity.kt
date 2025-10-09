@@ -86,7 +86,15 @@ class MainActivity : AppCompatActivity() {
                         val tvMonto = TextView(this@MainActivity)
 
                         tvFecha.text = dateFormat.format(registro.fecha)
-                        tvTipo.text = registro.tipo.name
+                        tvTipo.text = if (registro.tipo.name == "BORDADO" && registro.tipoBordado != null) {
+                            "Bordado - " + when (registro.tipoBordado) {
+                                TipoBordado.TROYER -> "Troyer"
+                                TipoBordado.MOLDE -> "Molde"
+                                TipoBordado.CHOMPAS_LANA -> "Chompas de lana"
+                            }
+                        } else {
+                            registro.tipo.name.capitalize()
+                        }
                         tvCantidad.text = registro.cantidad.toString()
                         tvMonto.text = String.format(Locale.getDefault(), "%.2f", registro.total)
 
@@ -131,6 +139,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvClementeSaldo: TextView
     private lateinit var tvPonchosNumero: TextView
     private lateinit var tvLaloSaldo: TextView
+    private lateinit var tvSaldoGeneral: TextView
     
     // Permiso para solicitar permisos de almacenamiento
     private val requestPermissionsLauncher = registerForActivityResult(
@@ -186,6 +195,7 @@ class MainActivity : AppCompatActivity() {
         tvClementeSaldo = findViewById(R.id.tv_clemente_saldo)
         tvPonchosNumero = findViewById(R.id.tv_ponchos_numero)
         tvLaloSaldo = findViewById(R.id.tv_lalo_saldo)
+        tvSaldoGeneral = findViewById(R.id.tv_saldo_general)
         
         // Inicializar FAB
         val fabAdd: FloatingActionButton = findViewById(R.id.fab_add)
@@ -216,14 +226,33 @@ class MainActivity : AppCompatActivity() {
             mostrarDialogoVerRegistros(TipoServicio.BORDADO)
         }
 
-        // MODAL: Registro de chompa para clemente
+
+        // Botón para ver registros de Clemente
         btnRegistroClemente.setOnClickListener {
             mostrarDialogoVerRegistros(TipoServicio.CHOMPA)
         }
 
-        // MODAL: Registro de poncho para Lalo
+        // Botón para ver registros de Lalo
         btnRegistroLalo.setOnClickListener {
             mostrarDialogoVerRegistros(TipoServicio.PONCHO)
+        }
+
+        // Botón para registrar servicio de Clemente
+        val btnRegistrarClemente = findViewById<MaterialButton>(R.id.btn_registrar_clemente)
+        btnRegistrarClemente.setOnClickListener {
+            mostrarDialogoRegistroServicio(TipoServicio.CHOMPA) { cantidad ->
+                registrarServicio(TipoServicio.CHOMPA, cantidad)
+                Toast.makeText(this, "Chompa registrada: $cantidad", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Botón para registrar servicio de Lalo
+        val btnRegistrarLalo = findViewById<MaterialButton>(R.id.btn_registrar_lalo)
+        btnRegistrarLalo.setOnClickListener {
+            mostrarDialogoRegistroServicio(TipoServicio.PONCHO) { cantidad ->
+                registrarServicio(TipoServicio.PONCHO, cantidad)
+                Toast.makeText(this, "Poncho registrada: $cantidad", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // MODAL: Adelantos para Jefe
@@ -301,13 +330,16 @@ class MainActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
         val view = layoutInflater.inflate(R.layout.dialogo_registro_servicio, null)
         builder.setView(view)
-        
+
         val dialog = builder.create()
-        
-        val etCantidad = view.findViewById<EditText>(R.id.et_cantidad)
-        val btnGuardar = view.findViewById<Button>(R.id.btn_guardar)
-        val tvTitulo = view.findViewById<TextView>(R.id.tv_titulo_servicio)
-        
+
+            val etCantidad = view.findViewById<EditText>(R.id.et_cantidad)
+            val tvTitulo = view.findViewById<TextView>(R.id.tv_titulo_servicio)
+            val layoutTiposBordado = view.findViewById<View>(R.id.layout_tipos_bordado)
+            val btnTroyer = view.findViewById<Button>(R.id.btn_bordado_troyer)
+            val btnMolde = view.findViewById<Button>(R.id.btn_bordado_molde)
+            val btnChompas = view.findViewById<Button>(R.id.btn_bordado_chompas)
+
         // Ajustar título según el tipo de servicio
         when (tipoServicio) {
             TipoServicio.BORDADO -> tvTitulo.text = "Registro de Bordado"
@@ -315,23 +347,66 @@ class MainActivity : AppCompatActivity() {
             TipoServicio.CHOMPA -> tvTitulo.text = "Registro de Chompa"
             TipoServicio.PONCHO -> tvTitulo.text = "Registro de Poncho"
         }
-        
-        btnGuardar.setOnClickListener {
-            val cantidadText = etCantidad.text.toString()
-            if (cantidadText.isNotEmpty()) {
-                val cantidad = cantidadText.toInt()
-                if (cantidad > 0) {
-                    callback(cantidad)
-                    dialog.dismiss()
+
+        if (tipoServicio == TipoServicio.BORDADO) {
+            // Mostrar botones de tipo de bordado
+            layoutTiposBordado.visibility = View.VISIBLE
+            val onTipoClick = { tipoBordado: TipoBordado ->
+                val cantidadText = etCantidad.text.toString()
+                if (cantidadText.isNotEmpty()) {
+                    val cantidad = cantidadText.toInt()
+                    if (cantidad > 0) {
+                        registrarServicioBordado(tipoBordado, cantidad)
+                        dialog.dismiss()
+                    } else {
+                        Toast.makeText(this, "La cantidad debe ser mayor a cero", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
-                    Toast.makeText(this, "La cantidad debe ser mayor a cero", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Ingrese una cantidad válida", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Toast.makeText(this, "Ingrese una cantidad válida", Toast.LENGTH_SHORT).show()
+            }
+            btnTroyer.setOnClickListener { onTipoClick(TipoBordado.TROYER) }
+            btnMolde.setOnClickListener { onTipoClick(TipoBordado.MOLDE) }
+            btnChompas.setOnClickListener { onTipoClick(TipoBordado.CHOMPAS_LANA) }
+        } else {
+            // Ocultar botones de tipo de bordado y mostrar guardar
+            layoutTiposBordado.visibility = View.GONE
+            val btnGuardar = view.findViewById<Button>(R.id.btn_guardar)
+            btnGuardar.visibility = View.VISIBLE
+            btnGuardar.setOnClickListener {
+                val cantidadText = etCantidad.text.toString()
+                if (cantidadText.isNotEmpty()) {
+                    val cantidad = cantidadText.toInt()
+                    if (cantidad > 0) {
+                        callback(cantidad)
+                        dialog.dismiss()
+                    } else {
+                        Toast.makeText(this, "La cantidad debe ser mayor a cero", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Toast.makeText(this, "Ingrese una cantidad válida", Toast.LENGTH_SHORT).show()
+                }
             }
         }
-        
+
         dialog.show()
+    }
+
+    // Nuevo método para registrar bordado con tipo
+    private fun registrarServicioBordado(tipoBordado: TipoBordado, cantidad: Int) {
+        val monto = 0.5 * cantidad // mismo precio para todos los tipos
+        lifecycleScope.launch {
+            val registro = Registro(
+                tipo = TipoServicio.BORDADO,
+                cantidad = cantidad,
+                total = monto,
+                tipoBordado = tipoBordado
+            )
+            repository.saveRegistro(registro)
+            withContext(Dispatchers.Main) {
+                actualizarSaldos()
+            }
+        }
     }
     
     private fun registrarServicio(tipo: TipoServicio, cantidad: Int) {
@@ -424,7 +499,6 @@ class MainActivity : AppCompatActivity() {
 
                     // Saldo general (suma de todos los saldos)
                     val saldoGeneral = jefeSaldoFinal + saldoChompas + saldoPonchos
-                    val tvSaldoGeneral = findViewById<TextView>(R.id.tv_saldo_general)
                     tvSaldoGeneral.text = "Saldo general: S/ ${String.format("%.2f", saldoGeneral)}"
                 }
             } catch (e: Exception) {

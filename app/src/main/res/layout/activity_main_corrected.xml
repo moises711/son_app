@@ -19,18 +19,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-            
-            <!-- Saldo General -->
-            <TextView
-                android:id="@+id/tv_saldo_general"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/saldo_general_label"
-                android:textColor="@color/balance_blue"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginBottom="16dp" />
 
             <!-- Card del Jefe -->
             <androidx.cardview.widget.CardView
@@ -64,15 +52,6 @@
                             android:textColor="@color/white"
                             android:textSize="18sp"
                             android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tv_jefe_saldo"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:text="@string/jefe_saldo"
-                            android:textColor="@color/balance_yellow"
-                            android:textSize="14sp" />
 
                         <TextView
                             android:id="@+id/tv_jefe_saldos"
