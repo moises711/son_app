@@ -9,6 +9,7 @@
     <string name="jefe">jefe</string>
     <string name="jefe_saldos">saldos s/0.00</string>
     <string name="jefe_saldo">saldo s/0.00</string>
+    <string name="jefe_total_registros">registros: 0</string>
 
     <string name="bordados">bordados</string>
     <string name="planchados">planchados</string>
@@ -46,5 +47,32 @@
     <string name="select_service_type">Seleccione tipo de servicio</string>
     <string name="select_service">Seleccionar servicio</string>
     <string name="precio_unitario">Precio unitario: S/ 0.00</string>
+    <string name="configuracion">Configuración</string>
+    <string name="guardar">Guardar</string>
+    <string name="configuracion_titulo">Configuración de la aplicación</string>
+    <string name="moneda">Moneda</string>
+    <string name="mostrar_decimales">Mostrar decimales</string>
+    <string name="formato_fecha">Formato de fecha</string>
+    
+    <!-- Nuevos strings para panel de estado financiero -->
+    <string name="estado_financiero_titulo">Estado Financiero</string>
+    <string name="saldo_general_etiqueta">Saldo General:</string>
+    <string name="ingresos_hoy_etiqueta">Ingresos Hoy:</string>
+    <string name="ingresos_hoy_valor">S/ 0.00</string>
+    <string name="total_registros_etiqueta">Total Registros:</string>
+    <string name="total_registros_valor">0 registros</string>
+    
+    <!-- Strings para diálogo de registro de bordados -->
+    <string name="seleccione_tipo_bordado">Seleccione el tipo de bordado:</string>
+    <string name="bordado_troyer">Bordado Troyer</string>
+    <string name="bordado_molde">Bordado Molde</string>
+    <string name="bordado_chompas">Bordado Chompas de Lana</string>
+    
+    <!-- Strings para diálogo de pagos y adelantos -->
+    <string name="registrar_pago">Registrar Pago</string>
+    <string name="pago">Pago</string>
+    <string name="adelanto">Adelanto</string>
+    <string name="monto">Monto</string>
+    <string name="observacion_opcional">Observación (opcional)</string>
 
 </resources>

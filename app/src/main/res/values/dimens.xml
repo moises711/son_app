@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tamaños de texto para toda la aplicación -->
+    <dimen name="text_size_very_small">12sp</dimen>
+    <dimen name="text_size_small">14sp</dimen>
+    <dimen name="text_size_medium">16sp</dimen>
+    <dimen name="text_size_large">18sp</dimen>
+    <dimen name="text_size_very_large">20sp</dimen>
+    <dimen name="text_size_extra_large">22sp</dimen>
+    
+    <!-- Márgenes y espaciados -->
+    <dimen name="margin_small">4dp</dimen>
+    <dimen name="margin_medium">8dp</dimen>
+    <dimen name="margin_large">16dp</dimen>
+    <dimen name="margin_very_large">24dp</dimen>
+    
+    <!-- Padding -->
+    <dimen name="padding_small">4dp</dimen>
+    <dimen name="padding_medium">8dp</dimen>
+    <dimen name="padding_large">16dp</dimen>
+    <dimen name="padding_very_large">24dp</dimen>
+    
+    <!-- Tamaños de botones -->
+    <dimen name="button_min_height">48dp</dimen>
+    <dimen name="button_padding">12dp</dimen>
+</resources>

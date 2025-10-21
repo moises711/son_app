@@ -13,6 +13,20 @@ import java.util.Date
  * Repositorio para acceder a los datos de la aplicación
  */
 class SamRepository(private val context: Context) {
+    // Obtener todos los pagos como modelo de dominio
+    suspend fun getAllPagos(): List<Pago> = withContext(Dispatchers.IO) {
+        pagoDao.getAllPagos().map { it.toPago() }
+    }
+    
+    // Obtener todos los pagos como entidades
+    suspend fun getAllPagosEntities(): List<PagoEntity> = withContext(Dispatchers.IO) {
+        pagoDao.getAllPagos()
+    }
+
+    // Eliminar todos los registros de bordado y planchado
+    suspend fun eliminarRegistrosBordadoPlanchado() = withContext(Dispatchers.IO) {
+        registroDao.deleteAllBordadoPlanchadoRegistros()
+    }
     
     // Referencia a la base de datos
     private val appDatabase = AppDatabase.getDatabase(context)
@@ -82,6 +96,21 @@ class SamRepository(private val context: Context) {
         registroDao.insert(registroEntity)
     }
     
+    // Actualizar registro existente
+    suspend fun updateRegistro(registroEntity: RegistroEntity) = withContext(Dispatchers.IO) {
+        registroDao.update(registroEntity)
+    }
+    
+    // Eliminar registro
+    suspend fun deleteRegistro(registroEntity: RegistroEntity) = withContext(Dispatchers.IO) {
+        registroDao.delete(registroEntity)
+    }
+    
+    // Obtener registro por ID
+    suspend fun getRegistroById(id: Long): RegistroEntity? = withContext(Dispatchers.IO) {
+        registroDao.getRegistroById(id)
+    }
+    
     // Guardar adelanto
     suspend fun saveAdelanto(adelanto: Adelanto) = withContext(Dispatchers.IO) {
         val adelantoEntity = AdelantoEntity(
@@ -101,6 +130,41 @@ class SamRepository(private val context: Context) {
     // Obtener el total de adelantos
     suspend fun getTotalAdelantos(): Double = withContext(Dispatchers.IO) {
         adelantoDao.getTotalAdelantos() ?: 0.0
+    }
+    
+    // Actualizar saldo acumulado
+    suspend fun actualizarSaldoAcumulado(nuevoSaldo: Double) = withContext(Dispatchers.IO) {
+        val config = getConfiguracion()
+        configDao.update(config.copy(saldoAcumulado = nuevoSaldo))
+    }
+
+    // Obtener saldo acumulado
+    suspend fun getSaldoAcumulado(): Double = withContext(Dispatchers.IO) {
+        getConfiguracion().saldoAcumulado
+    }
+    
+    // Actualizar configuración completa
+    suspend fun updateConfig(config: ConfigEntity) = withContext(Dispatchers.IO) {
+        configDao.update(config)
+    }
+    
+    // Métodos alias para compatibilidad con código existente
+    suspend fun update(registroEntity: RegistroEntity) = updateRegistro(registroEntity)
+    
+    suspend fun delete(registroEntity: RegistroEntity) = deleteRegistro(registroEntity)
+    suspend fun saveRegistroEntity(registro: RegistroEntity) = withContext(Dispatchers.IO) {
+        registroDao.insert(registro)
+    }
+    
+    companion object {
+        @Volatile
+        private var INSTANCE: SamRepository? = null
+        
+        fun getInstance(context: Context): SamRepository {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: SamRepository(context.applicationContext).also { INSTANCE = it }
+            }
+        }
     }
 }
 

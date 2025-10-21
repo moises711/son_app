@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="@dimen/margin_large"
     android:background="@drawable/bg_modal_black">
 
     <TextView
@@ -14,9 +14,9 @@
         android:text="Ver Registros"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="18sp"
+        android:textSize="@dimen/text_size_large"
         android:textStyle="bold"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="@dimen/margin_large" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -34,7 +34,7 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/purple_500"
+                android:background="@color/primary_500"
                 android:padding="5dp">
 
                 <TextView
@@ -42,12 +42,14 @@
                     android:layout_height="wrap_content"
                     android:text="Fecha"
                     android:textColor="@color/white"
+                    android:textSize="@dimen/text_size_medium"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Tipo"
+                    android:textSize="@dimen/text_size_medium"
                     android:textColor="@color/white"
                     android:textStyle="bold" />
 

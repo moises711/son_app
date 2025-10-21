@@ -1,41 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <color name="primary_200">#FF90CAF9</color>
+    <color name="primary_500">#FF2196F3</color>
+    <color name="primary_700">#FF1976D2</color>
+    <color name="secondary_200">#FF80DEEA</color>
+    <color name="secondary_700">#FF0097A7</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     
-    <!-- Colores principales para la UI elegante -->
-    <color name="app_background">#FF0F0F0F</color>
-    <color name="card_background">#FF1A1A1A</color>
+    <!-- Colores principales para la UI en modo claro -->
+    <color name="app_background">#FFF5F5F5</color>
+    <color name="card_background">#FFFFFFFF</color>
+    <color name="text_primary">#FF212121</color>
+    <color name="text_secondary">#FF757575</color>
     <color name="dark_text">#FF1A1A1A</color>
     
-    <!-- Colores para los saldos -->
-    <color name="balance_green">#FF06B6D4</color>
-    <color name="balance_blue">#FF3B82F6</color>
-    <color name="balance_yellow">#FF0EA5E9</color>
+    <!-- Colores para los saldos en modo claro -->
+    <color name="balance_green">#FF0097A7</color>
+    <color name="balance_blue">#FF1976D2</color>
+    <color name="balance_yellow">#FF0288D1</color>
     
-    <!-- Gradientes -->
-    <color name="gradient_start">#FF1A1A1A</color>
-    <color name="gradient_end">#FF2D2D2D</color>
-    <color name="gradient_top_start">#FF0F172A</color>
-    <color name="gradient_top_end">#FF1E3A8A</color>
+    <!-- Gradientes para modo claro -->
+    <color name="gradient_start">#FFFFFFFF</color>
+    <color name="gradient_end">#FFF0F0F0</color>
+    <color name="gradient_top_start">#FFE3F2FD</color>
+    <color name="gradient_top_end">#FF1976D2</color>
     
-    <!-- Botones -->
+    <!-- Botones en modo claro -->
     <color name="button_blue">#FF2196F3</color>
-    <color name="button_white">#FFFFFFFF</color>
+    <color name="button_white">#FF212121</color>
     <color name="button_pressed">#FF1976D2</color>
+    <color name="button_text">#FFFFFFFF</color>
+    
+    <!-- Color de fondo para diálogos en modo claro -->
+    <color name="dialog_background">#FFFFFFFF</color>
     
     <!-- Estados -->
-    <color name="accent_color">#FF6200EE</color>
+    <color name="accent_color">@color/primary_500</color>
     <color name="error_color">#FFF44336</color>
     <color name="success_color">#FF4CAF50</color>
     <color name="warning_color">#FFFF9800</color>
     
     <!-- Tabla -->
-    <color name="table_row_even">#33FFFFFF</color>
-    <color name="table_row_odd">#22FFFFFF</color>
+    <color name="table_row_even">#FFEEEEEE</color>
+    <color name="table_row_odd">#FFFAFAFA</color>
+    
+    <!-- Bordes para widgets -->
+    <color name="widget_border">#FF000000</color>
 </resources>

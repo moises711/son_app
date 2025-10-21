@@ -14,6 +14,9 @@ interface RegistroDao {
 
     @Update
     suspend fun update(registro: RegistroEntity)
+    
+    @androidx.room.Delete
+    suspend fun delete(registro: RegistroEntity)
 
     @Query("SELECT * FROM registros WHERE tipo IN (:tipos)")
     suspend fun getRegistrosByTipo(tipos: List<String>): List<RegistroEntity>
