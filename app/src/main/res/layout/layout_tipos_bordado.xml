@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_tipos_bordado"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:visibility="gone">
+    
+    <TextView
+        android:id="@+id/tv_titulo_servicio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/seleccione_tipo_bordado"
+        android:textColor="@color/white"
+        android:textSize="@dimen/text_size_medium"
+        android:textAlignment="center"
+        android:layout_marginBottom="@dimen/margin_medium"/>
+        
+    <Button
+        android:id="@+id/btn_bordado_troyer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/bordado_troyer"
+        android:textColor="@color/white"
+        android:background="@drawable/button_rounded_blue"
+        android:layout_marginBottom="@dimen/margin_small" />
+        
+    <Button
+        android:id="@+id/btn_bordado_molde"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/bordado_molde"
+        android:textColor="@color/white"
+        android:background="@drawable/button_rounded_blue"
+        android:layout_marginBottom="@dimen/margin_small" />
+        
+    <Button
+        android:id="@+id/btn_bordado_chompas"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/bordado_chompas"
+        android:textColor="@color/white"
+        android:background="@drawable/button_rounded_blue"
+        android:layout_marginBottom="@dimen/margin_small" />
+        
+    <Button
+        android:id="@+id/btn_guardar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/guardar"
+        android:textColor="@color/white"
+        android:background="@drawable/button_accent_gradient"
+        android:visibility="gone"
+        android:layout_marginBottom="@dimen/margin_small" />
+</LinearLayout>

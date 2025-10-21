@@ -16,7 +16,7 @@ import androidx.room.TypeConverters
         ConfigEntity::class,
         AdelantoEntity::class
     ],
-    version = 1,
+    version = 2, // Incrementar versión para migración
     exportSchema = true
 )
 @TypeConverters(DateConverter::class)
@@ -31,7 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null
-        
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -39,10 +39,18 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "sam_database"
                 )
+                .addMigrations(MIGRATION_1_2)
                 .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance
+            }
+        }
+
+        // Migración de la versión 1 a la 2: agregar saldoAcumulado a configuraciones
+        val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE configuraciones ADD COLUMN saldoAcumulado REAL NOT NULL DEFAULT 0.0")
             }
         }
     }

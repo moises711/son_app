@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Tema para el modo claro -->
+    <!-- Tema para el modo oscuro -->
     <style name="Theme.SAM" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Colores primarios -->
-        <item name="colorPrimary">@color/primary_500</item>
+        <item name="colorPrimary">@color/primary_200</item>
         <item name="colorPrimaryVariant">@color/primary_700</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/black</item>
         
         <!-- Colores secundarios -->
         <item name="colorSecondary">@color/secondary_200</item>
@@ -26,7 +26,7 @@
         <item name="colorDialogBackground">@color/dialog_background</item>
         
         <!-- Colores para estado -->
-        <item name="colorAccent">@color/primary_500</item>
+        <item name="colorAccent">@color/primary_200</item>
         <item name="colorError">@color/error_color</item>
         <item name="colorSuccess">@color/success_color</item>
         <item name="colorWarning">@color/warning_color</item>

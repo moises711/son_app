@@ -9,5 +9,9 @@ data class ConfigEntity(
     @PrimaryKey
     val id: Int = 1, // Singleton
     val adelantos: Double = 0.0,
+    val saldoAcumulado: Double = 0.0, // Nuevo campo para saldo acumulativo
+    val moneda: String = "S/",
+    val formatoFecha: String = "dd/MM/yy",
+    val mostrarDecimales: Boolean = true,
     val ultimaModificacion: Date = Date()
 )

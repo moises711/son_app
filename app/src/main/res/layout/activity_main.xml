@@ -8,29 +8,136 @@
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/main_nested_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingTop="24dp"
-        android:clipToPadding="false">
+        android:clipToPadding="false"
+        android:fillViewport="true">
 
         <LinearLayout
+            android:id="@+id/main_content_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
             
-            <!-- Saldo General -->
-            <TextView
-                android:id="@+id/tv_saldo_general"
+            <!-- Panel de estado financiero general -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_estado_general"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/saldo_general_label"
-                android:textColor="@color/balance_blue"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/gradient_card_bordered"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <!-- Título -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/estado_financiero_titulo"
+                        android:textColor="@color/text_primary"
+                        android:textSize="@dimen/text_size_medium"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:layout_marginBottom="8dp"/>
+                        
+                    <!-- Saldo General -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/saldo_general_etiqueta"
+                            android:textSize="@dimen/text_size_medium"
+                            android:textColor="@color/text_primary"/>
+                            
+                        <TextView
+                            android:id="@+id/tv_saldo_general"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/saldo_general_label"
+                            android:textColor="@color/balance_blue"
+                            android:textSize="@dimen/text_size_medium"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                    
+                    <!-- Ingresos del día -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/ingresos_hoy_etiqueta"
+                            android:textSize="@dimen/text_size_medium"
+                            android:textColor="@color/text_primary"/>
+                            
+                        <TextView
+                            android:id="@+id/tv_ingresos_hoy"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ingresos_hoy_valor"
+                            android:textColor="@color/success_color"
+                            android:textSize="@dimen/text_size_medium"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                    
+                    <!-- Total Registros -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/total_registros_etiqueta"
+                            android:textSize="@dimen/text_size_medium"
+                            android:textColor="@color/text_primary"/>
+                            
+                        <TextView
+                            android:id="@+id/tv_total_registros"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/total_registros_valor"
+                            android:textColor="@color/balance_green"
+                            android:textSize="@dimen/text_size_medium"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+                    
+                    <!-- Botón de Configuración -->
+                    <Button
+                        android:id="@+id/btn_configuracion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/configuracion"
+                        android:textColor="@color/button_text"
+                        android:backgroundTint="@color/primary_500"
+                        android:drawableStart="@android:drawable/ic_menu_preferences"
+                        android:drawableTint="@color/white"
+                        android:gravity="center"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- Card del Jefe -->
             <androidx.cardview.widget.CardView
@@ -38,14 +145,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/gradient_card_dark"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="6dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/gradient_card_dark"
+                    android:background="@drawable/gradient_card_bordered"
                     android:orientation="vertical"
                     android:padding="16dp">
 
@@ -53,7 +159,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
+                        android:layout_marginBottom="@dimen/margin_large"
                         android:orientation="horizontal">
 
                         <TextView
@@ -62,26 +168,35 @@
                             android:layout_weight="1"
                             android:text="@string/jefe"
                             android:textColor="@color/white"
-                            android:textSize="18sp"
+                            android:textSize="@dimen/text_size_very_large"
                             android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_jefe_total_registros"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="@dimen/margin_medium"
+                            android:text="@string/jefe_total_registros"
+                            android:textColor="@color/balance_green"
+                            android:textSize="@dimen/text_size_medium" />
 
                         <TextView
                             android:id="@+id/tv_jefe_saldo"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
+                            android:layout_marginEnd="@dimen/margin_medium"
                             android:text="@string/jefe_saldo"
                             android:textColor="@color/balance_yellow"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/text_size_medium" />
 
                         <TextView
                             android:id="@+id/tv_jefe_saldos"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp"
+                            android:layout_marginEnd="@dimen/margin_large"
                             android:text="@string/jefe_saldos"
                             android:textColor="@color/balance_blue"
-                            android:textSize="14sp" />
+                            android:textSize="@dimen/text_size_medium" />
                     </LinearLayout>
 
                     <!-- Botones superiores del Jefe -->
@@ -95,28 +210,28 @@
                             android:id="@+id/btn_bordados"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
+                            android:layout_marginEnd="@dimen/margin_medium"
                             android:layout_weight="1"
                             android:background="@drawable/button_rounded_white"
                             android:text="@string/bordados"
-                            android:textColor="@color/dark_text"
+                            android:textColor="@color/white"
                             android:contentDescription="@string/bordados"
-                            android:textSize="14sp"
-                            android:minHeight="48dp"
+                            android:textSize="@dimen/text_size_medium"
+                            android:minHeight="@dimen/button_min_height"
                             tools:ignore="TextContrastCheck" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_planchados"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="@dimen/margin_medium"
                             android:layout_weight="1"
                             android:background="@drawable/button_rounded_white"
                             android:text="@string/planchados"
-                            android:textColor="@color/dark_text"
+                            android:textColor="@color/white"
                             android:contentDescription="@string/planchados"
-                            android:textSize="14sp"
-                            android:minHeight="48dp"
+                            android:textSize="@dimen/text_size_medium"
+                            android:minHeight="@dimen/button_min_height"
                             tools:ignore="TextContrastCheck" />
                     </LinearLayout>
 
@@ -130,42 +245,42 @@
                             android:id="@+id/btn_registro_jefe"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="4dp"
+                            android:layout_marginEnd="@dimen/margin_small"
                             android:layout_weight="1"
                             android:background="@drawable/button_rounded_blue"
                             android:text="@string/registro"
                             android:textColor="@color/white"
                             android:contentDescription="@string/cd_registro_jefe"
-                            android:textSize="12sp"
-                            android:minHeight="48dp" />
+                            android:textSize="@dimen/text_size_small"
+                            android:minHeight="@dimen/button_min_height" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_descargar_pdf"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="4dp"
-                            android:layout_marginStart="4dp"
+                            android:layout_marginEnd="@dimen/margin_small"
+                            android:layout_marginStart="@dimen/margin_small"
                             android:layout_weight="1"
                             android:background="@drawable/button_rounded_blue"
                             android:text="@string/descargar_pdf"
                             android:textColor="@color/white"
                             android:contentDescription="@string/descargar_pdf"
-                            android:textSize="12sp"
-                            android:minHeight="48dp"
+                            android:textSize="@dimen/text_size_small"
+                            android:minHeight="@dimen/button_min_height"
                             tools:ignore="TouchTargetSizeCheck" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_adelantos"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
+                            android:layout_marginStart="@dimen/margin_small"
                             android:layout_weight="1"
                             android:background="@drawable/button_rounded_blue"
                             android:text="@string/adelantos"
                             android:textColor="@color/white"
                             android:contentDescription="@string/adelantos"
-                            android:textSize="12sp"
-                            android:minHeight="48dp"
+                            android:textSize="@dimen/text_size_small"
+                            android:minHeight="@dimen/button_min_height"
                             tools:ignore="VisualLintButtonSize" />
                     </LinearLayout>
                 </LinearLayout>
@@ -177,14 +292,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/gradient_card_dark"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="6dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/gradient_card_dark"
+                    android:background="@drawable/gradient_card_bordered"
                     android:orientation="vertical"
                     android:padding="16dp">
 
@@ -210,14 +324,7 @@
                             android:layout_marginEnd="16dp"
                             android:orientation="vertical">
 
-                            <TextView
-                                android:id="@+id/tv_chompas_pendientes"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="@string/chompas_pendientes"
-                                android:textColor="@color/balance_blue"
-                                android:textSize="12sp" />
+
 
                             <TextView
                                 android:id="@+id/tv_chompas_numero"
@@ -266,10 +373,11 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_weight="1"
-                            android:background="@drawable/button_rounded_white"
+                            android:background="@drawable/button_bordered_accent"
                             android:text="@string/pagos"
-                            android:textColor="@color/dark_text"
+                            android:textColor="@color/white"
                             android:contentDescription="@string/cd_pagos_clemente"
+                            android:textStyle="bold"
                             android:textSize="14sp"
                             android:minHeight="48dp"
                             tools:ignore="TextContrastCheck" />
@@ -281,11 +389,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:background="@drawable/button_rounded_blue"
+                        android:background="@drawable/button_bordered_accent"
                         android:text="@string/registrar_servicio_clemente"
                         android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:minHeight="48dp" />
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:elevation="4dp"
+                        android:minHeight="56dp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -295,14 +405,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/gradient_card_dark"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="6dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/gradient_card_dark"
+                    android:background="@drawable/gradient_card_bordered"
                     android:orientation="vertical"
                     android:padding="16dp">
 
@@ -328,14 +437,7 @@
                             android:layout_marginEnd="16dp"
                             android:orientation="vertical">
 
-                            <TextView
-                                android:id="@+id/tv_ponchos_pendientes"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center"
-                                android:text="@string/ponchos_pendientes"
-                                android:textColor="@color/balance_blue"
-                                android:textSize="12sp" />
+
 
                             <TextView
                                 android:id="@+id/tv_ponchos_numero"
@@ -384,11 +486,12 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_weight="1"
-                            android:background="@drawable/button_rounded_white"
+                            android:background="@drawable/button_bordered_accent"
                             android:text="@string/pagos"
-                            android:textColor="@color/dark_text"
+                            android:textColor="@color/white"
                             android:contentDescription="@string/cd_pagos_lalo"
                             android:minHeight="48dp"
+                            android:textStyle="bold"
                             android:textSize="14sp" />
                     </LinearLayout>
                     
@@ -398,26 +501,17 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:background="@drawable/button_rounded_blue"
+                        android:background="@drawable/button_bordered_accent"
                         android:text="@string/registrar_servicio_lalo"
                         android:textColor="@color/white"
-                        android:textSize="14sp"
-                        android:minHeight="48dp" />
+                        android:textStyle="bold"
+                        android:textSize="16sp"
+                        android:elevation="4dp"
+                        android:minHeight="56dp" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
         </LinearLayout>
-    </ScrollView>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:contentDescription="@string/add_new_record"
-        app:srcCompat="@android:drawable/ic_input_add"
-        app:backgroundTint="@color/purple_500"
-        app:tint="@color/white" />
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

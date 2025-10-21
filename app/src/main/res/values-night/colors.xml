@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Colores primarios -->
+    <color name="primary_200">#FF64B5F6</color>
+    <color name="primary_500">#FF1E88E5</color>
+    <color name="primary_700">#FF0D47A1</color>
+    <color name="secondary_200">#FF26C6DA</color>
+    <color name="secondary_700">#FF00838F</color>
+    
+    <!-- Colores principales para la UI en modo oscuro -->
+    <color name="app_background">#FF0F0F0F</color>
+    <color name="card_background">#FF1A1A1A</color>
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#FFCCCCCC</color>
+    
+    <!-- Colores para los saldos en modo oscuro -->
+    <color name="balance_green">#FF06B6D4</color>
+    <color name="balance_blue">#FF3B82F6</color>
+    <color name="balance_yellow">#FF0EA5E9</color>
+    
+    <!-- Gradientes para modo oscuro -->
+    <color name="gradient_start">#FF1A1A1A</color>
+    <color name="gradient_end">#FF2D2D2D</color>
+    <color name="gradient_top_start">#FF0F172A</color>
+    <color name="gradient_top_end">#FF1E3A8A</color>
+    
+    <!-- Botones en modo oscuro -->
+    <color name="button_blue">#FF2196F3</color>
+    <color name="button_text">#FFFFFFFF</color>
+    <color name="button_pressed">#FF1976D2</color>
+    
+    <!-- Color de fondo para diálogos en modo oscuro -->
+    <color name="dialog_background">#FF1A1A1A</color>
+    
+    <!-- Estados -->
+    <color name="accent_color">@color/primary_200</color>
+    <color name="error_color">#FFF44336</color>
+    <color name="success_color">#FF4CAF50</color>
+    <color name="warning_color">#FFFF9800</color>
+    
+    <!-- Tabla en modo oscuro -->
+    <color name="table_row_even">#33FFFFFF</color>
+    <color name="table_row_odd">#22FFFFFF</color>
+    
+    <!-- Bordes para widgets en modo oscuro -->
+    <color name="widget_border">#FFFFFFFF</color>
+</resources>

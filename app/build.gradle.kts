@@ -82,7 +82,7 @@ dependencies {
     kapt(libs.androidx.room.compiler)
 
     // PDF Generation
-    implementation(libs.itext7.core)
+    implementation("com.itextpdf:itextpdf:5.5.13.3")
     
     // Test dependencies
     testImplementation(libs.junit)
