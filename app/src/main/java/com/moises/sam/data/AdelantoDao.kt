@@ -22,4 +22,7 @@ interface AdelantoDao {
     
     @Query("SELECT SUM(monto) FROM adelantos")
     suspend fun getTotalAdelantos(): Double?
+
+    @Query("DELETE FROM adelantos")
+    suspend fun deleteAllAdelantos()
 }

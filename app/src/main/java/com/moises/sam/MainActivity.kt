@@ -7,12 +7,20 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.ProgressBar
+import android.animation.ObjectAnimator
+import android.animation.AnimatorSet
+import android.view.animation.OvershootInterpolator
+import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -75,6 +83,11 @@ class MainActivity : AppCompatActivity() {
     // Card de estados financieros
     private lateinit var tvSaldoGeneral: TextView
     private lateinit var tvIngresosHoy: TextView
+    private lateinit var tvMetaIngresos: TextView
+    private lateinit var progressMetaIngresos: ProgressBar
+    private lateinit var tvMetaDetalle: TextView
+    private lateinit var successOverlay: View
+    private lateinit var successCheck: ImageView
     
     // Card del jefe (Bordado y planchado)
     private lateinit var tvJefeSaldo: TextView
@@ -145,6 +158,11 @@ class MainActivity : AppCompatActivity() {
         
         tvSaldoGeneral = findViewById(R.id.tv_saldo_general)
         tvIngresosHoy = findViewById(R.id.tv_ingresos_hoy)
+    tvMetaIngresos = findViewById(R.id.tv_meta_ingresos)
+    progressMetaIngresos = findViewById(R.id.progress_meta_ingresos)
+    tvMetaDetalle = findViewById(R.id.tv_meta_detalle)
+    successOverlay = findViewById(R.id.success_check_overlay)
+    successCheck = findViewById(R.id.iv_success_check)
         
         tvJefeSaldo = findViewById(R.id.tv_jefe_saldo)
         tvJefeSaldos = findViewById(R.id.tv_jefe_saldos)
@@ -172,7 +190,7 @@ class MainActivity : AppCompatActivity() {
         btnBordado.setOnClickListener {
             mostrarDialogoRegistroServicio(TipoServicio.BORDADO) { cantidad ->
                 registrarServicio(TipoServicio.BORDADO, cantidad)
-                Toast.makeText(this, "Bordado registrado: $cantidad", Toast.LENGTH_SHORT).show()
+                mostrarCheckExito()
             }
         }
         
@@ -180,7 +198,7 @@ class MainActivity : AppCompatActivity() {
         btnPlanchado.setOnClickListener {
             mostrarDialogoRegistroServicio(TipoServicio.PLANCHADO) { cantidad ->
                 registrarServicio(TipoServicio.PLANCHADO, cantidad)
-                Toast.makeText(this, "Planchado registrado: $cantidad", Toast.LENGTH_SHORT).show()
+                mostrarCheckExito()
             }
         }
         
@@ -201,7 +219,7 @@ class MainActivity : AppCompatActivity() {
         
         // Botón para ver registros del Jefe (Bordado y Planchado)
         findViewById<MaterialButton>(R.id.btn_registro_jefe).setOnClickListener {
-            mostrarDialogoVerRegistros(TipoServicio.BORDADO)
+            mostrarDialogoVerRegistrosJefe()
         }
         
         // Botón para registrar pagos de Clemente
@@ -219,7 +237,7 @@ class MainActivity : AppCompatActivity() {
         btnRegistrarClemente.setOnClickListener {
             mostrarDialogoRegistroServicio(TipoServicio.CHOMPA) { cantidad ->
                 registrarServicio(TipoServicio.CHOMPA, cantidad)
-                Toast.makeText(this, "Chompa registrada: $cantidad", Toast.LENGTH_SHORT).show()
+                mostrarCheckExito()
             }
         }
 
@@ -228,57 +246,61 @@ class MainActivity : AppCompatActivity() {
         btnRegistrarLalo.setOnClickListener {
             mostrarDialogoRegistroServicio(TipoServicio.PONCHO) { cantidad ->
                 registrarServicio(TipoServicio.PONCHO, cantidad)
-                Toast.makeText(this, "Poncho registrada: $cantidad", Toast.LENGTH_SHORT).show()
+                mostrarCheckExito()
             }
         }
 
-        // MODAL: Adelantos para Jefe
+        // MODAL: Adelantos para Jefe (ver lista)
         btnAdelantos.setOnClickListener {
-            mostrarDialogoAdelantos()
+            mostrarDialogoListaAdelantos()
         }
 
         // Botón para generar PDF SOLO con registros de jefe
         btnDescargarPdf.setOnClickListener {
-            // Mostrar modal para ingresar monto de pago
+            // Modal personalizado con fondo propio (no transparente)
             val builder = AlertDialog.Builder(this)
-            builder.setTitle("Registrar pago antes de descargar PDF")
-            val input = EditText(this)
-            input.inputType = android.text.InputType.TYPE_CLASS_NUMBER or android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL
-            builder.setView(input)
-            builder.setPositiveButton("Registrar y Generar PDF") { _, _ ->
-                val monto = try {
-                    input.text.toString().toDouble()
-                } catch (e: NumberFormatException) {
-                    0.0
+            val view = layoutInflater.inflate(R.layout.dialog_pago_pdf, null)
+            builder.setView(view)
+            val dialog = builder.create()
+            dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
+
+            val etMonto = view.findViewById<TextInputEditText>(R.id.et_pdf_monto)
+            val btnCancelar = view.findViewById<Button>(R.id.btn_pdf_cancelar)
+            val btnRegistrar = view.findViewById<Button>(R.id.btn_pdf_registrar)
+
+            btnCancelar.setOnClickListener { dialog.dismiss() }
+
+            btnRegistrar.setOnClickListener {
+                val monto = etMonto.text?.toString()?.toDoubleOrNull() ?: 0.0
+                if (monto <= 0.0) {
+                    etMonto.error = "Ingrese un monto válido"
+                    return@setOnClickListener
                 }
-                
-                if (monto > 0) {
-                    lifecycleScope.launch {
-                        val pagos = withContext(Dispatchers.IO) { repository.getAllPagos() }
-                        
-                        repository.savePago(Pago(
-                            monto = monto,
-                            observacion = "Pago registrado antes de generar PDF"
-                        ))
-                        
-                        Toast.makeText(this@MainActivity, "Pago registrado: S/. $monto", Toast.LENGTH_SHORT).show()
-                        // Generar PDF con contenido
-                        val exito = generarPDF()
-                        
-                        if (exito) {
-                            Toast.makeText(this@MainActivity, "PDF generado correctamente", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(this@MainActivity, "Error al generar PDF", Toast.LENGTH_SHORT).show()
-                        }
-                        
-                        actualizarSaldos()
+                lifecycleScope.launch {
+                    // Registrar pago etiquetado explícitamente como del JEFE para que aparezca en el PDF del jefe
+                    repository.savePago(Pago(
+                        monto = monto,
+                        observacion = "PAGO_JEFE: Pago registrado antes de generar PDF"
+                    ))
+
+                    mostrarCheckExito()
+                    // Generar PDF con contenido (y cerrar ciclo del Jefe)
+                    val exito = generarPDF(monto)
+
+                    if (exito) {
+                        Toast.makeText(this@MainActivity, "PDF generado correctamente", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this@MainActivity, "Error al generar PDF", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(this, "Debe ingresar un monto válido", Toast.LENGTH_SHORT).show()
+
+                    actualizarSaldos()
+                    dialog.dismiss()
                 }
             }
-            builder.setNegativeButton("Cancelar", null)
-            builder.show()
+
+            dialog.show()
         }
     }
     
@@ -306,7 +328,12 @@ class MainActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.dialog_registro_servicio, null)
         builder.setView(view)
 
-        val dialog = builder.create()
+    val dialog = builder.create()
+    dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+    dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
+    dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+    dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
 
         val etCantidad = view.findViewById<EditText>(R.id.et_cantidad)
         
@@ -408,11 +435,33 @@ class MainActivity : AppCompatActivity() {
         }
         
         lifecycleScope.launch {
-            // Crear objeto de registro
+            // Ajuste por crédito (excedente de pagos) para CHOMPA y PONCHO
+            val totalARegistrar = withContext(Dispatchers.IO) {
+                if (tipo == TipoServicio.CHOMPA || tipo == TipoServicio.PONCHO) {
+                    val credito = repository.getCreditoMonto(tipo)
+                    if (credito > 0.0) {
+                        val restante = monto - credito
+                        when {
+                            restante <= 0.0 -> {
+                                // Todo cubierto por crédito: consumir y registrar total 0
+                                repository.addCredito(tipo, -monto)
+                                0.0
+                            }
+                            else -> {
+                                // Parcialmente cubierto: consumir crédito y registrar el resto
+                                repository.addCredito(tipo, -credito)
+                                restante
+                            }
+                        }
+                    } else monto
+                } else monto
+            }
+
+            // Crear objeto de registro (monto ajustado por crédito si aplica)
             val registro = Registro(
                 tipo = tipo,
                 cantidad = cantidad,
-                total = monto
+                total = totalARegistrar
             )
             
             // Guardar en la base de datos
@@ -421,26 +470,66 @@ class MainActivity : AppCompatActivity() {
             // Actualizar UI en hilo principal
             withContext(Dispatchers.Main) {
                 actualizarSaldos()
-                Toast.makeText(this@MainActivity, "Servicio registrado correctamente", Toast.LENGTH_SHORT).show()
+                mostrarCheckExito()
             }
         }
     }
+        private fun mostrarCheckExito() {
+            try {
+                successOverlay.visibility = View.VISIBLE
+                successOverlay.alpha = 0f
+                successOverlay.scaleX = 0.7f
+                successOverlay.scaleY = 0.7f
+
+                val fadeIn = ObjectAnimator.ofFloat(successOverlay, View.ALPHA, 0f, 1f).apply { duration = 340 }
+                val scaleUpX = ObjectAnimator.ofFloat(successOverlay, View.SCALE_X, 0.7f, 1.12f).apply {
+                    duration = 380
+                    interpolator = OvershootInterpolator(2.2f)
+                }
+                val scaleUpY = ObjectAnimator.ofFloat(successOverlay, View.SCALE_Y, 0.7f, 1.12f).apply {
+                    duration = 380
+                    interpolator = OvershootInterpolator(2.2f)
+                }
+
+                val hold = ObjectAnimator.ofFloat(successOverlay, View.ALPHA, 1f, 1f).apply { duration = 1100 }
+
+                val fadeOut = ObjectAnimator.ofFloat(successOverlay, View.ALPHA, 1f, 0f).apply { duration = 300 }
+                val scaleDownX = ObjectAnimator.ofFloat(successOverlay, View.SCALE_X, 1.12f, 0.85f).apply { duration = 300 }
+                val scaleDownY = ObjectAnimator.ofFloat(successOverlay, View.SCALE_Y, 1.12f, 0.85f).apply { duration = 300 }
+
+                val intro = AnimatorSet().apply { playTogether(fadeIn, scaleUpX, scaleUpY) }
+                val outro = AnimatorSet().apply { playTogether(fadeOut, scaleDownX, scaleDownY) }
+                val total = AnimatorSet().apply { playSequentially(intro, hold, outro) }
+                total.addListener(object : android.animation.AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: android.animation.Animator) {
+                        successOverlay.visibility = View.GONE
+                    }
+                })
+                total.start()
+            } catch (e: Exception) {
+                // Fallback silencioso si la vista no está disponible
+            }
+        }
     
     private fun mostrarDialogoPagoAdelanto(titulo: String, tipoServicio: TipoServicio) {
         val builder = AlertDialog.Builder(this)
         val view = layoutInflater.inflate(R.layout.dialog_pago_adelanto, null)
         builder.setView(view)
 
-        val dialog = builder.create()
+    val dialog = builder.create()
+    dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+    dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
 
-        // Usar los IDs correctos del layout dialog_pago_adelanto
+    // Usar los IDs correctos del layout dialog_pago_adelanto
+    val tvTitulo = view.findViewById<TextView>(R.id.tv_pago_title)
         val etMonto = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_pago_monto)
         val etObservacion = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_pago_observacion)
         val btnRegistrar = view.findViewById<Button>(R.id.btn_pago_registrar)
         val btnCancelar = view.findViewById<Button>(R.id.btn_pago_cancelar)
         
-        // Configuración inicial
-        dialog.setTitle(titulo)
+    // Configuración inicial: título dentro del layout (evitar barra de título del sistema)
+    tvTitulo.text = titulo
         
         // Cancelar
         btnCancelar.setOnClickListener {
@@ -469,7 +558,7 @@ class MainActivity : AppCompatActivity() {
                     actualizarRegistrosConPago(tipoServicio, monto)
                     withContext(Dispatchers.Main) {
                         actualizarSaldos()
-                        Toast.makeText(this@MainActivity, "Pago registrado: S/. $monto", Toast.LENGTH_SHORT).show()
+                        mostrarCheckExito()
                         dialog.dismiss()
                     }
                 }
@@ -485,63 +574,64 @@ class MainActivity : AppCompatActivity() {
      * Muestra el diálogo de configuración de la aplicación
      */
     private fun mostrarDialogoConfiguracion() {
+        // Convertido en diálogo de Meta de Ingresos
         val builder = AlertDialog.Builder(this)
-        val view = layoutInflater.inflate(R.layout.dialog_configuracion, null)
+        val view = layoutInflater.inflate(R.layout.dialog_meta_ingresos, null)
         builder.setView(view)
-        
-        val dialog = builder.create()
-        
-        // Referencias a vistas en el diálogo - usar IDs correctos del XML
-        val etMoneda = view.findViewById<EditText>(R.id.et_config_moneda)
-        val etFormatoFecha = view.findViewById<EditText>(R.id.et_config_formato_fecha)
-        val switchDecimales = view.findViewById<androidx.appcompat.widget.SwitchCompat>(R.id.switch_config_decimales)
-        val btnGuardar = view.findViewById<Button>(R.id.btn_config_guardar)
-        val btnCancelar = view.findViewById<Button>(R.id.btn_config_cancelar)
-        
-        // Cargar datos actuales
+
+    val dialog = builder.create()
+    dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+    dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
+    dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+    dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
+
+    val etMeta = view.findViewById<TextInputEditText>(R.id.et_meta_monto)
+    val rgPeriodo = view.findViewById<android.widget.RadioGroup>(R.id.rg_meta_periodo)
+    val rbDia = view.findViewById<android.widget.RadioButton>(R.id.rb_meta_dia)
+    val rbSemana = view.findViewById<android.widget.RadioButton>(R.id.rb_meta_semana)
+    val rbMes = view.findViewById<android.widget.RadioButton>(R.id.rb_meta_mes)
+        val btnGuardar = view.findViewById<Button>(R.id.btn_meta_guardar)
+        val btnCancelar = view.findViewById<Button>(R.id.btn_meta_cancelar)
+
         lifecycleScope.launch {
             val config = withContext(Dispatchers.IO) { repository.getConfiguracion() }
             withContext(Dispatchers.Main) {
-                // Configurar valores según los controles disponibles
-                etMoneda.setText(config.moneda ?: "S/")
-                etFormatoFecha.setText(config.formatoFecha ?: "dd/MM/yyyy")
-                switchDecimales.isChecked = config.mostrarDecimales ?: true
+                etMeta.setText(String.format(Locale.getDefault(), "%.2f", config.metaIngresos))
+                when (config.metaPeriodo) {
+                    "SEMANA" -> rbSemana.isChecked = true
+                    "MES" -> rbMes.isChecked = true
+                    else -> rbDia.isChecked = true
+                }
             }
         }
-        
-        // Cancelar
-        btnCancelar.setOnClickListener {
-            dialog.dismiss()
-        }
-        
-        // Guardar configuración
+
+        btnCancelar.setOnClickListener { dialog.dismiss() }
+
         btnGuardar.setOnClickListener {
-            val moneda = etMoneda.text.toString()
-            val formatoFecha = etFormatoFecha.text.toString()
-            val mostrarDecimales = switchDecimales.isChecked
-            
-            if (moneda.isEmpty() || formatoFecha.isEmpty()) {
-                Toast.makeText(this, "Complete todos los campos", Toast.LENGTH_SHORT).show()
+            val metaText = etMeta.text?.toString()?.trim().orEmpty()
+            val meta = metaText.toDoubleOrNull()
+            if (meta == null || meta < 0) {
+                etMeta.error = "Ingrese un monto válido"
                 return@setOnClickListener
             }
-            
             lifecycleScope.launch {
                 val config = withContext(Dispatchers.IO) { repository.getConfiguracion() }
-                val updatedConfig = config.copy(
-                    moneda = moneda,
-                    formatoFecha = formatoFecha,
-                    mostrarDecimales = mostrarDecimales
-                )
-                repository.updateConfig(updatedConfig)
-                
+                val periodo = when (rgPeriodo.checkedRadioButtonId) {
+                    R.id.rb_meta_semana -> "SEMANA"
+                    R.id.rb_meta_mes -> "MES"
+                    else -> "DIA"
+                }
+                val updated = config.copy(metaIngresos = meta, metaPeriodo = periodo)
+                withContext(Dispatchers.IO) { repository.updateConfig(updated) }
                 withContext(Dispatchers.Main) {
                     actualizarSaldos()
-                    Toast.makeText(this@MainActivity, "Configuración guardada", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity, "Meta guardada", Toast.LENGTH_SHORT).show()
                     dialog.dismiss()
                 }
             }
         }
-        
+
         dialog.show()
     }
     
@@ -552,7 +642,12 @@ class MainActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.dialog_pago_adelanto, null)
         val builder = AlertDialog.Builder(this)
         builder.setView(view)
-        val dialog = builder.create()
+    val dialog = builder.create()
+    dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+    dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
+    dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+    dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
 
         // IDs válidos en dialog_pago_adelanto.xml
         val etMonto = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_pago_monto)
@@ -583,7 +678,7 @@ class MainActivity : AppCompatActivity() {
                         repository.saveAdelanto(Adelanto(monto = monto, observacion = "$tipoObs: $observacion"))
                         withContext(Dispatchers.Main) {
                             actualizarSaldos()
-                            Toast.makeText(this@MainActivity, "Adelanto registrado: S/. $monto", Toast.LENGTH_SHORT).show()
+                            mostrarCheckExito()
                             dialog.dismiss()
                         }
                     }
@@ -593,6 +688,89 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        dialog.show()
+    }
+
+    /**
+     * Muestra un diálogo con la lista de adelantos registrados
+     */
+    private fun mostrarDialogoListaAdelantos() {
+        val view = layoutInflater.inflate(R.layout.dialog_ver_adelantos, null)
+        val builder = AlertDialog.Builder(this)
+        builder.setView(view)
+    val dialog = builder.create()
+    dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        val tableAdelantos = view.findViewById<TableLayout>(R.id.table_adelantos)
+        val tvNoRecords = view.findViewById<TextView>(R.id.tv_no_adelantos)
+        val btnClose = view.findViewById<Button>(R.id.btn_close)
+        val etMonto = view.findViewById<TextInputEditText>(R.id.et_adelanto_monto)
+        val etObs = view.findViewById<TextInputEditText>(R.id.et_adelanto_observacion)
+        val btnAdd = view.findViewById<Button>(R.id.btn_add_adelanto)
+
+        lifecycleScope.launch {
+            val adelantos = withContext(Dispatchers.IO) { repository.getAllAdelantos() }
+
+            withContext(Dispatchers.Main) {
+                // Limpiar filas anteriores excepto el header (index 0)
+                while (tableAdelantos.childCount > 1) {
+                    tableAdelantos.removeViewAt(1)
+                }
+
+                if (adelantos.isEmpty()) {
+                    tvNoRecords.visibility = View.VISIBLE
+                } else {
+                    tvNoRecords.visibility = View.GONE
+                    val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+
+                    adelantos.forEach { a ->
+                        val row = TableRow(this@MainActivity)
+
+                        val tvFecha = TextView(this@MainActivity)
+                        tvFecha.text = dateFormat.format(a.fecha)
+                        tvFecha.setTextColor(resources.getColor(R.color.text_primary, theme))
+                        row.addView(tvFecha)
+
+                        val tvObs = TextView(this@MainActivity)
+                        tvObs.text = a.observacion ?: ""
+                        tvObs.setTextColor(resources.getColor(R.color.text_primary, theme))
+                        row.addView(tvObs)
+
+                        val tvMonto = TextView(this@MainActivity)
+                        tvMonto.text = String.format(Locale.getDefault(), "%.2f", a.monto)
+                        tvMonto.setTextColor(resources.getColor(R.color.balance_blue, theme))
+                        row.addView(tvMonto)
+
+                        tableAdelantos.addView(row)
+                    }
+                }
+            }
+        }
+
+        btnAdd.setOnClickListener {
+            val montoText = etMonto.text?.toString().orEmpty()
+            val monto = montoText.toDoubleOrNull()
+            if (monto == null || monto <= 0.0) {
+                etMonto.error = "Ingrese un monto válido"
+                return@setOnClickListener
+            }
+            val observacion = etObs.text?.toString().orEmpty()
+
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    repository.saveAdelanto(Adelanto(monto = monto, observacion = "ADELANTO_JEFE: $observacion"))
+                }
+                withContext(Dispatchers.Main) {
+                    // Mostrar éxito y cerrar el diálogo tras registrar el adelanto
+                    mostrarCheckExito()
+                    dialog.dismiss()
+                    // Actualizar saldos del header
+                    lifecycleScope.launch { actualizarSaldos() }
+                }
+            }
+        }
+
+        btnClose.setOnClickListener { dialog.dismiss() }
         dialog.show()
     }
 
@@ -661,6 +839,13 @@ class MainActivity : AppCompatActivity() {
                     repository.update(registro)
                 }
                 
+                // Si queda monto pendiente luego de cubrir todos los registros, registrar como CRÉDITO a favor
+                if (montoPendiente > 0) {
+                    if (tipoServicio == TipoServicio.CHOMPA || tipoServicio == TipoServicio.PONCHO) {
+                        repository.addCredito(tipoServicio, montoPendiente)
+                    }
+                }
+
                 // Forzar la sincronización con la base de datos
                 withContext(Dispatchers.Main) {
                     Toast.makeText(this@MainActivity, "Registros actualizados correctamente", Toast.LENGTH_SHORT).show()
@@ -690,6 +875,7 @@ class MainActivity : AppCompatActivity() {
                 val pagos = repository.getAllPagosEntities()
                 val config = repository.getConfiguracion()
                 val saldoAcumulado = repository.getSaldoAcumulado()
+                val totalAdelantos = repository.getTotalAdelantos()
 
                 // Calcular saldos
                 var saldoBordadoPlanchado = 0.0
@@ -724,29 +910,37 @@ class MainActivity : AppCompatActivity() {
                 registrosChompas.forEach { registro ->
                     saldoChompas += registro.monto
                 }
+                // Restar créditos (excedentes de pago) para Clemente
+                val creditoChompa = repository.getCreditoMonto(TipoServicio.CHOMPA)
+                saldoChompas -= creditoChompa
                 // Ya no restamos los pagos porque se han eliminado los registros correspondientes
                 
                 var saldoPonchos = 0.0
                 registrosPonchos.forEach { registro ->
                     saldoPonchos += registro.monto
                 }
+                // Restar créditos (excedentes de pago) para Lalo
+                val creditoPoncho = repository.getCreditoMonto(TipoServicio.PONCHO)
+                saldoPonchos -= creditoPoncho
                 // Ya no restamos los pagos porque se han eliminado los registros correspondientes
 
                 // Actualizar UI en hilo principal
                 withContext(Dispatchers.Main) {
                     // Jefe (Bordado y Planchado)
                     tvJefeSaldos.text = "BP: S/ ${String.format(Locale.getDefault(), "%.2f", saldoBordadoPlanchado)}"
-                    val jefeSaldoFinal = saldoBordadoPlanchado + saldoAcumulado - config.adelantos
+                    // Saldo del Jefe: mantener fijo y solo actualizar al descargar PDF.
+                    // Por lo tanto, mostramos únicamente el saldo acumulado histórico.
+                    val jefeSaldoFinal = saldoAcumulado
                     tvJefeSaldo.text = "Saldo: S/ ${String.format(Locale.getDefault(), "%.2f", jefeSaldoFinal)}"
                     if (jefeSaldoFinal > 0) {
-                        tvJefeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
+                        tvJefeSaldo.setTextColor(resources.getColor(R.color.balance_green, theme))
                     } else if (jefeSaldoFinal < 0) {
                         tvJefeSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
                     } else {
-                        tvJefeSaldo.setTextColor(resources.getColor(R.color.success_color, theme))
+                        tvJefeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
                     }
 
-                    // Total de dinero de los registros del jefe
+                    // Total de dinero de los registros del jefe (oculto en UI)
                     val totalMontoRegistrosJefe = registrosBordadoPlanchado.sumOf { it.monto.toDouble() }
                     tvJefeTotalRegistros.text = "Total registros: S/ ${String.format(Locale.getDefault(), "%.2f", totalMontoRegistrosJefe)}"
 
@@ -754,22 +948,22 @@ class MainActivity : AppCompatActivity() {
                     tvChompasNumero.text = registrosChompas.size.toString()
                     tvClementeSaldo.text = "Saldo: S/ ${String.format(Locale.getDefault(), "%.2f", saldoChompas)}"
                     if (saldoChompas > 0) {
-                        tvClementeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
+                        tvClementeSaldo.setTextColor(resources.getColor(R.color.balance_green, theme))
                     } else if (saldoChompas < 0) {
                         tvClementeSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
                     } else {
-                        tvClementeSaldo.setTextColor(resources.getColor(R.color.success_color, theme))
+                        tvClementeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
                     }
 
                     // Ponchos (Lalo)
                     tvPonchosNumero.text = registrosPonchos.size.toString()
                     tvLaloSaldo.text = "Saldo: S/ ${String.format(Locale.getDefault(), "%.2f", saldoPonchos)}"
                     if (saldoPonchos > 0) {
-                        tvLaloSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
+                        tvLaloSaldo.setTextColor(resources.getColor(R.color.balance_green, theme))
                     } else if (saldoPonchos < 0) {
                         tvLaloSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
                     } else {
-                        tvLaloSaldo.setTextColor(resources.getColor(R.color.success_color, theme))
+                        tvLaloSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
                     }
 
                     // Saldo general (suma de todos los saldos)
@@ -813,6 +1007,118 @@ class MainActivity : AppCompatActivity() {
                     }
                     
                     tvIngresosHoy.text = "S/ ${String.format(Locale.getDefault(), "%.2f", ingresos)}"
+
+                    // Calcular ingresos de la semana (Lun-Dom)
+                    val calInicioSemana = Calendar.getInstance().apply {
+                        firstDayOfWeek = Calendar.MONDAY
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                        set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+                    }
+                    val inicioSemana = calInicioSemana.time
+                    val calFinSemana = Calendar.getInstance().apply {
+                        firstDayOfWeek = Calendar.MONDAY
+                        set(Calendar.HOUR_OF_DAY, 23)
+                        set(Calendar.MINUTE, 59)
+                        set(Calendar.SECOND, 59)
+                        set(Calendar.MILLISECOND, 999)
+                        set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+                    }
+                    val finSemana = calFinSemana.time
+
+                    var ingresosSemana = 0.0
+                    val acumSiEnSemana: (Date, Double) -> Unit = { fecha, monto ->
+                        if (fecha in inicioSemana..finSemana) ingresosSemana += monto
+                    }
+                    registrosBordadoPlanchado.forEach { acumSiEnSemana(it.fecha, it.monto) }
+                    registrosChompas.forEach { acumSiEnSemana(it.fecha, it.monto) }
+                    registrosPonchos.forEach { acumSiEnSemana(it.fecha, it.monto) }
+
+                    // Calcular ingresos del mes actual
+                    val calInicioMes = Calendar.getInstance().apply {
+                        set(Calendar.DAY_OF_MONTH, 1)
+                        set(Calendar.HOUR_OF_DAY, 0)
+                        set(Calendar.MINUTE, 0)
+                        set(Calendar.SECOND, 0)
+                        set(Calendar.MILLISECOND, 0)
+                    }
+                    val inicioMes = calInicioMes.time
+                    val calFinMes = Calendar.getInstance().apply {
+                        set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
+                        set(Calendar.HOUR_OF_DAY, 23)
+                        set(Calendar.MINUTE, 59)
+                        set(Calendar.SECOND, 59)
+                        set(Calendar.MILLISECOND, 999)
+                    }
+                    val finMes = calFinMes.time
+
+                    var ingresosMes = 0.0
+                    val acumSiEnMes: (Date, Double) -> Unit = { fecha, monto ->
+                        if (fecha in inicioMes..finMes) ingresosMes += monto
+                    }
+                    registrosBordadoPlanchado.forEach { acumSiEnMes(it.fecha, it.monto) }
+                    registrosChompas.forEach { acumSiEnMes(it.fecha, it.monto) }
+                    registrosPonchos.forEach { acumSiEnMes(it.fecha, it.monto) }
+
+                    // Actualizar progreso de meta de ingresos (color y faltante)
+                    val meta = config.metaIngresos
+                    if (meta > 0) {
+                        val ingresosPeriodo = when (config.metaPeriodo) {
+                            "SEMANA" -> ingresosSemana
+                            "MES" -> ingresosMes
+                            else -> ingresos
+                        }
+                        val porcentajeRaw = (ingresosPeriodo / meta) * 100
+                        val porcentaje = porcentajeRaw.coerceIn(0.0, 100.0)
+                        progressMetaIngresos.max = 100
+                        progressMetaIngresos.progress = porcentaje.toInt()
+
+                        // Texto con faltante o superávit
+                        val diferencia = meta - ingresosPeriodo
+                        val textoFaltante = if (diferencia > 0) {
+                            "Faltan S/ ${String.format(Locale.getDefault(), "%.2f", diferencia)}"
+                        } else {
+                            val superavit = -diferencia
+                            "¡Meta superada por S/ ${String.format(Locale.getDefault(), "%.2f", superavit)}!"
+                        }
+                        val etiqueta = when (config.metaPeriodo) {
+                            "SEMANA" -> "semanal"
+                            "MES" -> "mensual"
+                            else -> "diaria"
+                        }
+                        tvMetaIngresos.text = "Meta $etiqueta: S/ ${String.format(Locale.getDefault(), "%.2f", meta)}  (" +
+                                "${String.format(Locale.getDefault(), "%.0f", porcentaje)}% - $textoFaltante)"
+
+                        // Detalle bajo la barra
+                        tvMetaDetalle.text = "Ingresos del periodo: S/ ${String.format(Locale.getDefault(), "%.2f", ingresosPeriodo)} / S/ ${String.format(Locale.getDefault(), "%.2f", meta)}"
+
+                        // Color dinámico de la barra según porcentaje
+                        val colorRes = when {
+                            porcentajeRaw < 50.0 -> R.color.error_color
+                            porcentajeRaw < 80.0 -> R.color.balance_yellow
+                            else -> R.color.balance_green
+                        }
+                        // setTint compatible
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                            progressMetaIngresos.progressTintList = android.content.res.ColorStateList.valueOf(resources.getColor(colorRes, theme))
+                        }
+
+                        tvMetaIngresos.visibility = View.VISIBLE
+                        progressMetaIngresos.visibility = View.VISIBLE
+                        tvMetaDetalle.visibility = View.VISIBLE
+                    } else {
+                        tvMetaIngresos.text = "Meta no establecida"
+                        progressMetaIngresos.progress = 0
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                            progressMetaIngresos.progressTintList = android.content.res.ColorStateList.valueOf(resources.getColor(R.color.primary_700, theme))
+                        }
+                        tvMetaIngresos.visibility = View.VISIBLE
+                        progressMetaIngresos.visibility = View.VISIBLE
+                        tvMetaDetalle.text = ""
+                        tvMetaDetalle.visibility = View.GONE
+                    }
                     
                     // Actualizar contador de registros
                     // Estos elementos no existen en el layout
@@ -841,7 +1147,8 @@ class MainActivity : AppCompatActivity() {
         val tvTitle = dialogView.findViewById<TextView>(R.id.tv_dialog_title)
         tvTitle.text = "Registros de ${tipoServicio.name}"
         
-        val dialog = builder.create()
+    val dialog = builder.create()
+    dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         
         lifecycleScope.launch {
             val registros = when (tipoServicio) {
@@ -891,22 +1198,22 @@ class MainActivity : AppCompatActivity() {
                     // Agregar celdas a la fila
                     val tvFecha = TextView(context)
                     tvFecha.text = fechaStr
-                    tvFecha.setTextColor(context.resources.getColor(R.color.white, context.theme))
+                    tvFecha.setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
                     tableRow.addView(tvFecha)
                     
                     val tvTipo = TextView(context)
                     tvTipo.text = registro.tipoBordado ?: "-"
-                    tvTipo.setTextColor(context.resources.getColor(R.color.white, context.theme))
+                    tvTipo.setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
                     tableRow.addView(tvTipo)
                     
                     val tvCantidad = TextView(context)
                     tvCantidad.text = registro.cantidad.toString()
-                    tvCantidad.setTextColor(context.resources.getColor(R.color.white, context.theme))
+                    tvCantidad.setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
                     tableRow.addView(tvCantidad)
                     
                     val tvMonto = TextView(context)
                     tvMonto.text = String.format(Locale.getDefault(), "%.2f", registro.monto)
-                    tvMonto.setTextColor(context.resources.getColor(R.color.white, context.theme))
+                    tvMonto.setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
                     tableRow.addView(tvMonto)
                     
                     // Agregar la fila a la tabla
@@ -923,11 +1230,93 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    /**
+     * Muestra un diálogo para ver TODOS los registros del Jefe (Bordado y Planchado)
+     */
+    private fun mostrarDialogoVerRegistrosJefe() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_ver_registros, null)
+        val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+
+        // Título personalizado
+        val tvTitle = dialogView.findViewById<TextView>(R.id.tv_dialog_title)
+        tvTitle.text = "Registros del Jefe (Bordado y Planchado)"
+
+    val dialog = builder.create()
+    dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+    dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+    dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
+
+        lifecycleScope.launch {
+            val registros = withContext(Dispatchers.IO) {
+                repository.getRegistrosBordadoPlanchado()
+            }
+
+            val tableRegistros = dialogView.findViewById<TableLayout>(R.id.table_registros)
+            val tvNoRecords = dialogView.findViewById<TextView>(R.id.tv_no_records)
+            val btnClose = dialogView.findViewById<Button>(R.id.btn_close)
+
+            val context = this@MainActivity
+
+            if (registros.isEmpty()) {
+                tableRegistros.visibility = View.GONE
+                tvNoRecords.visibility = View.VISIBLE
+            } else {
+                tvNoRecords.visibility = View.GONE
+                tableRegistros.visibility = View.VISIBLE
+
+                // Limpiar tabla existente (excepto encabezado)
+                if (tableRegistros.childCount > 1) {
+                    tableRegistros.removeViews(1, tableRegistros.childCount - 1)
+                }
+
+                registros.sortedByDescending { it.fecha }.forEach { registro ->
+                    val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
+                    val fechaStr = dateFormat.format(registro.fecha)
+
+                    val tableRow = TableRow(context)
+                    tableRow.layoutParams = TableRow.LayoutParams(
+                        TableRow.LayoutParams.MATCH_PARENT,
+                        TableRow.LayoutParams.WRAP_CONTENT
+                    )
+                    tableRow.setPadding(5, 10, 5, 10)
+
+                    val tvFecha = TextView(context)
+                    tvFecha.text = fechaStr
+                    tvFecha.setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
+                    tableRow.addView(tvFecha)
+
+                    val tvTipo = TextView(context)
+                    // Mostrar subtipo si existe; si no, el tipo (BORDADO/PLANCHADO)
+                    tvTipo.text = registro.tipoBordado ?: registro.tipo
+                    tvTipo.setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
+                    tableRow.addView(tvTipo)
+
+                    val tvCantidad = TextView(context)
+                    tvCantidad.text = registro.cantidad.toString()
+                    tvCantidad.setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
+                    tableRow.addView(tvCantidad)
+
+                    val tvMonto = TextView(context)
+                    tvMonto.text = String.format(Locale.getDefault(), "%.2f", registro.monto)
+                    tvMonto.setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
+                    tableRow.addView(tvMonto)
+
+                    tableRegistros.addView(tableRow)
+                }
+            }
+
+            btnClose.setOnClickListener { dialog.dismiss() }
+
+            withContext(Dispatchers.Main) { dialog.show() }
+        }
+    }
     
     /**
      * Genera un archivo PDF con los registros y pagos
      */
-    private fun generarPDF(): Boolean {
+    private fun generarPDF(montoPagoJefe: Double = 0.0): Boolean {
         try {
             // Directorio para guardar PDF
             val pdfDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
@@ -948,8 +1337,8 @@ class MainActivity : AppCompatActivity() {
             val fontText = Font(Font.FontFamily.HELVETICA, 12f)
             val fontBold = Font(Font.FontFamily.HELVETICA, 12f, Font.BOLD)
             
-            // Título del documento
-            val title = Paragraph("Reporte de Servicios y Pagos", fontTitle)
+            // Título del documento (solo Jefe)
+            val title = Paragraph("Reporte del Jefe (Bordado y Planchado)", fontTitle)
             title.alignment = Element.ALIGN_CENTER
             title.spacingAfter = 20f
             document.add(title)
@@ -959,89 +1348,85 @@ class MainActivity : AppCompatActivity() {
             document.add(Paragraph("Hora: ${SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())}", fontText))
             document.add(Paragraph("\n"))
             
-            // Agregar tabla de registros
+            // Sección de Registros
             document.add(Paragraph("Registros", fontSubtitle))
             
-            val tableRegistros = PdfPTable(4)
-            tableRegistros.widthPercentage = 100f
-            tableRegistros.setWidths(floatArrayOf(3f, 2f, 2f, 2f))
-            
-            // Cabecera de tabla
-            var cell = PdfPCell(Phrase("Fecha", fontBold))
-            cell.horizontalAlignment = Element.ALIGN_CENTER
-            cell.backgroundColor = BaseColor.LIGHT_GRAY
-            tableRegistros.addCell(cell)
-            
-            cell = PdfPCell(Phrase("Tipo", fontBold))
-            cell.horizontalAlignment = Element.ALIGN_CENTER
-            cell.backgroundColor = BaseColor.LIGHT_GRAY
-            tableRegistros.addCell(cell)
-            
-            cell = PdfPCell(Phrase("Cantidad", fontBold))
-            cell.horizontalAlignment = Element.ALIGN_CENTER
-            cell.backgroundColor = BaseColor.LIGHT_GRAY
-            tableRegistros.addCell(cell)
-            
-            cell = PdfPCell(Phrase("Monto (S/.)", fontBold))
-            cell.horizontalAlignment = Element.ALIGN_CENTER
-            cell.backgroundColor = BaseColor.LIGHT_GRAY
-            tableRegistros.addCell(cell)
-            
-            // Agregar registros
+            // Agregar registros (solo Jefe: Bordado/Planchado)
             lifecycleScope.launch {
                 val registrosBordadoPlanchado = withContext(Dispatchers.IO) { repository.getRegistrosBordadoPlanchado() }
-                val registrosChompas = withContext(Dispatchers.IO) { repository.getRegistrosChompas() }
-                val registrosPonchos = withContext(Dispatchers.IO) { repository.getRegistrosPonchos() }
-                val pagos = withContext(Dispatchers.IO) { repository.getAllPagos() }
                 val config = withContext(Dispatchers.IO) { repository.getConfiguracion() }
+                val saldoAnterior = withContext(Dispatchers.IO) { repository.getSaldoAcumulado() }
+                // Obtener adelantos para mostrar resumen (no tabla)
+                val adelantos = withContext(Dispatchers.IO) { repository.getAllAdelantos() }
+                val totalAdelantosMonto = adelantos.sumOf { it.monto }
+                val totalAdelantosCantidad = adelantos.size
                 
-                val allRegistros = registrosBordadoPlanchado + registrosChompas + registrosPonchos
+                val allRegistros = registrosBordadoPlanchado
                 val dateFormat = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-                
-                allRegistros.sortedByDescending { it.fecha }.forEach { registro ->
-                    tableRegistros.addCell(dateFormat.format(registro.fecha))
-                    tableRegistros.addCell(registro.tipo)
-                    tableRegistros.addCell(registro.cantidad.toString())
-                    tableRegistros.addCell(String.format(Locale.getDefault(), "%.2f", registro.monto))
+
+                fun addSection(titleSec: String, lista: List<RegistroEntity>) {
+                    if (lista.isEmpty()) return
+                    // Título de sección
+                    val secTitle = Paragraph(titleSec, fontBold)
+                    secTitle.spacingBefore = 10f
+                    secTitle.spacingAfter = 6f
+                    document.add(secTitle)
+
+                    val table = PdfPTable(3)
+                    table.widthPercentage = 100f
+                    table.setWidths(floatArrayOf(3f, 2f, 2f))
+
+                    // Cabecera
+                    var h = PdfPCell(Phrase("Fecha", fontBold))
+                    h.horizontalAlignment = Element.ALIGN_CENTER
+                    h.backgroundColor = BaseColor.LIGHT_GRAY
+                    table.addCell(h)
+
+                    h = PdfPCell(Phrase("Cantidad", fontBold))
+                    h.horizontalAlignment = Element.ALIGN_CENTER
+                    h.backgroundColor = BaseColor.LIGHT_GRAY
+                    table.addCell(h)
+
+                    h = PdfPCell(Phrase("Monto (S/.)", fontBold))
+                    h.horizontalAlignment = Element.ALIGN_CENTER
+                    h.backgroundColor = BaseColor.LIGHT_GRAY
+                    table.addCell(h)
+
+                    // Filas
+                    lista.sortedByDescending { it.fecha }.forEachIndexed { index, r ->
+                        val bg = if (index % 2 == 0) BaseColor.WHITE else BaseColor(0xF7, 0xF7, 0xF7)
+                        var c = PdfPCell(Phrase(dateFormat.format(r.fecha), fontText))
+                        c.backgroundColor = bg
+                        table.addCell(c)
+
+                        c = PdfPCell(Phrase(r.cantidad.toString(), fontText))
+                        c.backgroundColor = bg
+                        table.addCell(c)
+
+                        c = PdfPCell(Phrase(String.format(Locale.getDefault(), "%.2f", r.monto), fontText))
+                        c.backgroundColor = bg
+                        table.addCell(c)
+                    }
+
+                    document.add(table)
                 }
-                
-                document.add(tableRegistros)
-                document.add(Paragraph("\n"))
-                
-                // Tabla de pagos
-                document.add(Paragraph("Pagos", fontSubtitle))
-                
-                val tablePagos = PdfPTable(3)
-                tablePagos.widthPercentage = 100f
-                tablePagos.setWidths(floatArrayOf(3f, 2f, 4f))
-                
-                // Cabecera de tabla de pagos
-                var cellPago = PdfPCell(Phrase("Fecha", fontBold))
-                cellPago.horizontalAlignment = Element.ALIGN_CENTER
-                cellPago.backgroundColor = BaseColor.LIGHT_GRAY
-                tablePagos.addCell(cellPago)
-                
-                cellPago = PdfPCell(Phrase("Monto (S/.)", fontBold))
-                cellPago.horizontalAlignment = Element.ALIGN_CENTER
-                cellPago.backgroundColor = BaseColor.LIGHT_GRAY
-                tablePagos.addCell(cellPago)
-                
-                cellPago = PdfPCell(Phrase("Observación", fontBold))
-                cellPago.horizontalAlignment = Element.ALIGN_CENTER
-                cellPago.backgroundColor = BaseColor.LIGHT_GRAY
-                tablePagos.addCell(cellPago)
-                
-                pagos.sortedByDescending { it.fecha }.forEach { pago ->
-                    tablePagos.addCell(dateFormat.format(pago.fecha))
-                    tablePagos.addCell(String.format(Locale.getDefault(), "%.2f", pago.monto))
-                    tablePagos.addCell(pago.observacion ?: "")
-                }
-                
-                document.add(tablePagos)
+
+                // Agrupaciones
+                val bordado = allRegistros.filter { it.tipo.equals("BORDADO", ignoreCase = true) }
+                val troyer = bordado.filter { it.tipoBordado?.equals("TROYER", ignoreCase = true) == true }
+                val molde = bordado.filter { it.tipoBordado?.equals("MOLDE", ignoreCase = true) == true }
+                val chompasLana = bordado.filter { it.tipoBordado?.equals("CHOMPAS_LANA", ignoreCase = true) == true }
+                val planchado = allRegistros.filter { it.tipo.equals("PLANCHADO", ignoreCase = true) }
+
+                addSection("Bordado — Troyer", troyer)
+                addSection("Bordado — Molde", molde)
+                addSection("Bordado — Chompas de lana", chompasLana)
+                addSection("Planchado", planchado)
+
                 document.add(Paragraph("\n"))
                 
                 // Resumen
-                document.add(Paragraph("Resumen", fontSubtitle))
+                document.add(Paragraph("Resumen (Jefe)", fontSubtitle))
                 
                 val tableSummary = PdfPTable(2)
                 tableSummary.widthPercentage = 70f
@@ -1059,24 +1444,52 @@ class MainActivity : AppCompatActivity() {
                 
                 // Calcular totales
                 val totalRegistros = allRegistros.sumOf { it.monto.toDouble() }
-                val totalPagos = pagos.sumOf { it.monto.toDouble() }
-                val saldoTotal = totalRegistros - totalPagos
-                
-                tableSummary.addCell("Total registros")
+                val pagoAplicado = montoPagoJefe
+                val adelantosAplicados = totalAdelantosMonto
+                val saldoNuevo = saldoAnterior + totalRegistros - pagoAplicado - adelantosAplicados
+
+                tableSummary.addCell("Saldo anterior")
+                tableSummary.addCell(String.format(Locale.getDefault(), "%.2f", saldoAnterior))
+
+                tableSummary.addCell("Total registros (periodo)")
                 tableSummary.addCell(String.format(Locale.getDefault(), "%.2f", totalRegistros))
-                
-                tableSummary.addCell("Total pagos")
-                tableSummary.addCell(String.format(Locale.getDefault(), "%.2f", totalPagos))
-                
-                tableSummary.addCell(PdfPCell(Phrase("Saldo", fontBold)))
-                tableSummary.addCell(PdfPCell(Phrase(String.format(Locale.getDefault(), "%.2f", saldoTotal), fontBold)))
+
+                tableSummary.addCell("Pago aplicado")
+                tableSummary.addCell(String.format(Locale.getDefault(), "%.2f", pagoAplicado))
+
+                tableSummary.addCell("Adelantos aplicados (${totalAdelantosCantidad})")
+                tableSummary.addCell(String.format(Locale.getDefault(), "%.2f", adelantosAplicados))
+
+                tableSummary.addCell(PdfPCell(Phrase("Saldo nuevo", fontBold)))
+                tableSummary.addCell(PdfPCell(Phrase(String.format(Locale.getDefault(), "%.2f", saldoNuevo), fontBold)))
+
+                // Nota: los adelantos ya fueron aplicados al saldo nuevo y se eliminarán del periodo
+                // (Se mantiene solo como comentario visual en el PDF)
                 
                 document.add(tableSummary)
-                
+
                 document.close()
-                
+
                 // Abrir el PDF
                 abrirPDF(pdfFile)
+
+                // Después de generar y abrir el PDF: cerrar ciclo del Jefe
+                // 1) Actualizar saldo acumulado con el total de registros del periodo menos el pago realizado ahora
+                val saldoAcumuladoActual = withContext(Dispatchers.IO) { repository.getSaldoAcumulado() }
+                val nuevoSaldoAcumulado = saldoAcumuladoActual + totalRegistros - montoPagoJefe - totalAdelantosMonto
+                withContext(Dispatchers.IO) {
+                    repository.actualizarSaldoAcumulado(nuevoSaldoAcumulado)
+                    // 2) Borrar todos los registros de Bordado/Planchado para iniciar nuevo periodo
+                    repository.eliminarRegistrosBordadoPlanchado()
+                    // 3) Borrar todos los adelantos del periodo
+                    repository.eliminarTodosAdelantos()
+                }
+
+                // 4) Refrescar UI en tiempo real
+                withContext(Dispatchers.Main) {
+                    actualizarSaldos()
+                    Toast.makeText(this@MainActivity, "Datos del Jefe actualizados", Toast.LENGTH_SHORT).show()
+                }
             }
             
             return true
@@ -1090,7 +1503,7 @@ class MainActivity : AppCompatActivity() {
      * Abre el archivo PDF generado
      */
     private fun abrirPDF(file: File) {
-        val uri = FileProvider.getUriForFile(this, "${applicationContext.packageName}.provider", file)
+        val uri = FileProvider.getUriForFile(this, "${applicationContext.packageName}.fileprovider", file)
         
         val intent = Intent(Intent.ACTION_VIEW)
         intent.setDataAndType(uri, "application/pdf")

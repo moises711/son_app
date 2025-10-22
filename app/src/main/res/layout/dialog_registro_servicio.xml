@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:text="@string/registrar_servicio"
         android:textAlignment="center"
-        android:textColor="@color/white"
+        android:textColor="@color/text_primary"
         android:textSize="@dimen/text_size_large"
         android:textStyle="bold"
         android:layout_marginBottom="@dimen/margin_medium" />
@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="number"
-            android:textColor="@color/white"
+            android:textColor="@color/text_primary"
             android:backgroundTint="#33FFFFFF" />
 
     </com.google.android.material.textfield.TextInputLayout>

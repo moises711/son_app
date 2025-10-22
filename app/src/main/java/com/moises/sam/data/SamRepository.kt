@@ -43,6 +43,9 @@ class SamRepository(private val context: Context) {
     // DAO para adelantos
     private val adelantoDao = appDatabase.adelantoDao()
     
+    // DAO para créditos
+    private val creditoDao = appDatabase.creditoDao()
+    
     // Obtener configuración
     suspend fun getConfiguracion(): ConfigEntity = withContext(Dispatchers.IO) {
         // Obtener configuración o crear si no existe
@@ -132,6 +135,11 @@ class SamRepository(private val context: Context) {
         adelantoDao.getTotalAdelantos() ?: 0.0
     }
     
+    // Eliminar todos los adelantos
+    suspend fun eliminarTodosAdelantos() = withContext(Dispatchers.IO) {
+        adelantoDao.deleteAllAdelantos()
+    }
+    
     // Actualizar saldo acumulado
     suspend fun actualizarSaldoAcumulado(nuevoSaldo: Double) = withContext(Dispatchers.IO) {
         val config = getConfiguracion()
@@ -141,6 +149,28 @@ class SamRepository(private val context: Context) {
     // Obtener saldo acumulado
     suspend fun getSaldoAcumulado(): Double = withContext(Dispatchers.IO) {
         getConfiguracion().saldoAcumulado
+    }
+
+    // Créditos por tipo (CHOMPA, PONCHO)
+    suspend fun getCreditoMonto(tipo: TipoServicio): Double = withContext(Dispatchers.IO) {
+        if (tipo == TipoServicio.CHOMPA || tipo == TipoServicio.PONCHO) {
+            creditoDao.getMontoByTipo(tipo.name) ?: 0.0
+        } else 0.0
+    }
+
+    suspend fun addCredito(tipo: TipoServicio, delta: Double) = withContext(Dispatchers.IO) {
+        if (tipo == TipoServicio.CHOMPA || tipo == TipoServicio.PONCHO) {
+            val actualNullable = creditoDao.getMontoByTipo(tipo.name)
+            val actual = actualNullable ?: 0.0
+            val nuevo = actual + delta
+            if (actualNullable == null) {
+                // No existe fila aún, insertar nueva
+                creditoDao.insert(CreditoEntity(tipo = tipo.name, monto = nuevo))
+            } else {
+                // Existe fila, actualizar monto
+                creditoDao.setMonto(tipo.name, nuevo)
+            }
+        }
     }
     
     // Actualizar configuración completa

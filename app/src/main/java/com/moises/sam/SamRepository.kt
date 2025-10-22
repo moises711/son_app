@@ -69,6 +69,10 @@ class SamRepository(private val context: Context) {
         dataRepository.actualizarAdelantos(monto)
     }
     
+    fun eliminarTodosAdelantos(): Unit = runBlocking<Unit> {
+        dataRepository.eliminarTodosAdelantos()
+    }
+    
     fun actualizarConfiguracion(config: Configuracion): Unit = runBlocking<Unit> {
         // Convertir Configuracion a ConfigEntity y usar updateConfig
         val configEntity = ConfigEntity(
@@ -76,7 +80,9 @@ class SamRepository(private val context: Context) {
             formatoFecha = config.formatoFecha,
             mostrarDecimales = config.mostrarDecimales,
             saldoAcumulado = config.saldoAcumulado,
-            adelantos = config.adelantos
+            adelantos = config.adelantos,
+            metaIngresos = config.metaIngresos,
+            metaPeriodo = config.metaPeriodo
         )
         dataRepository.updateConfig(configEntity)
     }
@@ -143,6 +149,15 @@ class SamRepository(private val context: Context) {
     
     fun getRegistroById(id: Long): RegistroEntity? = runBlocking {
         dataRepository.getRegistroById(id)
+    }
+
+    // Créditos (excedentes de pagos) por tipo
+    fun getCreditoMonto(tipo: TipoServicio): Double = runBlocking {
+        dataRepository.getCreditoMonto(tipo)
+    }
+
+    fun addCredito(tipo: TipoServicio, delta: Double): Unit = runBlocking<Unit> {
+        dataRepository.addCredito(tipo, delta)
     }
     
     companion object {
