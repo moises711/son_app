@@ -42,4 +42,10 @@
         <item name="android:background">@drawable/widget_border_background</item>
         <item name="android:padding">8dp</item>
     </style>
+
+    <!-- Animaciones de ventana para diálogos (nombre simple para evitar conflictos en R) -->
+    <style name="DialogAnimation">
+        <item name="android:windowEnterAnimation">@anim/dialog_scale_in</item>
+        <item name="android:windowExitAnimation">@anim/dialog_scale_out</item>
+    </style>
 </resources>

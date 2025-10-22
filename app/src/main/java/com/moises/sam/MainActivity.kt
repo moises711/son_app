@@ -7,9 +7,14 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
+import android.view.MotionEvent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.view.WindowManager
+import android.animation.ValueAnimator
+import android.animation.ArgbEvaluator
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TableLayout
@@ -108,6 +113,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvClementeSaldo: TextView
     private lateinit var tvPonchosNumero: TextView
     private lateinit var tvLaloSaldo: TextView
+
+    // Valores previos para animar montos
+    private var lastJefeSaldo: Double = 0.0
+    private var lastSaldoGeneral: Double = 0.0
+    private var lastClementeSaldo: Double = 0.0
+    private var lastLaloSaldoVal: Double = 0.0
+    private var lastIngresosHoy: Double = 0.0
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -180,6 +192,12 @@ class MainActivity : AppCompatActivity() {
         tvClementeSaldo = findViewById(R.id.tv_clemente_saldo)
         tvPonchosNumero = findViewById(R.id.tv_ponchos_numero)
         tvLaloSaldo = findViewById(R.id.tv_lalo_saldo)
+
+        // Animación de presión para botones principales
+        applyPressAnimation(
+            btnBordado, btnPlanchado, btnDescargarPdf, btnAdelantos, btnConfiguracion,
+            btnRegistroClemente, btnPagosClemente, btnRegistroLalo, btnPagosLalo
+        )
     }
     
     /**
@@ -240,6 +258,7 @@ class MainActivity : AppCompatActivity() {
                 mostrarCheckExito()
             }
         }
+        applyPressAnimation(btnRegistrarClemente)
 
         // Botón para registrar servicio de Lalo
         val btnRegistrarLalo = findViewById<MaterialButton>(R.id.btn_registrar_lalo)
@@ -249,6 +268,7 @@ class MainActivity : AppCompatActivity() {
                 mostrarCheckExito()
             }
         }
+        applyPressAnimation(btnRegistrarLalo)
 
         // MODAL: Adelantos para Jefe (ver lista)
         btnAdelantos.setOnClickListener {
@@ -405,6 +425,7 @@ class MainActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
+    dialog.window?.setWindowAnimations(R.style.DialogAnimation)
         dialog.show()
     }
 
@@ -567,6 +588,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         
+    dialog.window?.setWindowAnimations(R.style.DialogAnimation)
         dialog.show()
     }
 
@@ -631,7 +653,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
+        
         dialog.show()
     }
     
@@ -928,16 +950,14 @@ class MainActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     // Jefe (Bordado y Planchado)
                     tvJefeSaldos.text = "BP: S/ ${String.format(Locale.getDefault(), "%.2f", saldoBordadoPlanchado)}"
-                    // Saldo del Jefe: mantener fijo y solo actualizar al descargar PDF.
-                    // Por lo tanto, mostramos únicamente el saldo acumulado histórico.
-                    val jefeSaldoFinal = saldoAcumulado
+                    val jefeSaldoFinal = saldoBordadoPlanchado + saldoAcumulado - config.adelantos
                     tvJefeSaldo.text = "Saldo: S/ ${String.format(Locale.getDefault(), "%.2f", jefeSaldoFinal)}"
                     if (jefeSaldoFinal > 0) {
-                        tvJefeSaldo.setTextColor(resources.getColor(R.color.balance_green, theme))
+                        tvJefeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
                     } else if (jefeSaldoFinal < 0) {
                         tvJefeSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
                     } else {
-                        tvJefeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
+                        tvJefeSaldo.setTextColor(resources.getColor(R.color.success_color, theme))
                     }
 
                     // Total de dinero de los registros del jefe (oculto en UI)
@@ -948,27 +968,28 @@ class MainActivity : AppCompatActivity() {
                     tvChompasNumero.text = registrosChompas.size.toString()
                     tvClementeSaldo.text = "Saldo: S/ ${String.format(Locale.getDefault(), "%.2f", saldoChompas)}"
                     if (saldoChompas > 0) {
-                        tvClementeSaldo.setTextColor(resources.getColor(R.color.balance_green, theme))
+                        tvClementeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
                     } else if (saldoChompas < 0) {
                         tvClementeSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
                     } else {
-                        tvClementeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
+                        tvClementeSaldo.setTextColor(resources.getColor(R.color.success_color, theme))
                     }
 
                     // Ponchos (Lalo)
                     tvPonchosNumero.text = registrosPonchos.size.toString()
                     tvLaloSaldo.text = "Saldo: S/ ${String.format(Locale.getDefault(), "%.2f", saldoPonchos)}"
                     if (saldoPonchos > 0) {
-                        tvLaloSaldo.setTextColor(resources.getColor(R.color.balance_green, theme))
+                        tvLaloSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
                     } else if (saldoPonchos < 0) {
                         tvLaloSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
                     } else {
-                        tvLaloSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
+                        tvLaloSaldo.setTextColor(resources.getColor(R.color.success_color, theme))
                     }
 
                     // Saldo general (suma de todos los saldos)
                     val saldoGeneral = jefeSaldoFinal + saldoChompas + saldoPonchos
-                    tvSaldoGeneral.text = "S/ ${String.format(Locale.getDefault(), "%.2f", saldoGeneral)}"
+                    tvSaldoGeneral.animateAmount(lastSaldoGeneral, saldoGeneral, prefix = "S/ ")
+                    lastSaldoGeneral = saldoGeneral
                     
                     // Calcular ingresos del día
                     val hoy = Calendar.getInstance()
@@ -1007,118 +1028,6 @@ class MainActivity : AppCompatActivity() {
                     }
                     
                     tvIngresosHoy.text = "S/ ${String.format(Locale.getDefault(), "%.2f", ingresos)}"
-
-                    // Calcular ingresos de la semana (Lun-Dom)
-                    val calInicioSemana = Calendar.getInstance().apply {
-                        firstDayOfWeek = Calendar.MONDAY
-                        set(Calendar.HOUR_OF_DAY, 0)
-                        set(Calendar.MINUTE, 0)
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
-                        set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
-                    }
-                    val inicioSemana = calInicioSemana.time
-                    val calFinSemana = Calendar.getInstance().apply {
-                        firstDayOfWeek = Calendar.MONDAY
-                        set(Calendar.HOUR_OF_DAY, 23)
-                        set(Calendar.MINUTE, 59)
-                        set(Calendar.SECOND, 59)
-                        set(Calendar.MILLISECOND, 999)
-                        set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
-                    }
-                    val finSemana = calFinSemana.time
-
-                    var ingresosSemana = 0.0
-                    val acumSiEnSemana: (Date, Double) -> Unit = { fecha, monto ->
-                        if (fecha in inicioSemana..finSemana) ingresosSemana += monto
-                    }
-                    registrosBordadoPlanchado.forEach { acumSiEnSemana(it.fecha, it.monto) }
-                    registrosChompas.forEach { acumSiEnSemana(it.fecha, it.monto) }
-                    registrosPonchos.forEach { acumSiEnSemana(it.fecha, it.monto) }
-
-                    // Calcular ingresos del mes actual
-                    val calInicioMes = Calendar.getInstance().apply {
-                        set(Calendar.DAY_OF_MONTH, 1)
-                        set(Calendar.HOUR_OF_DAY, 0)
-                        set(Calendar.MINUTE, 0)
-                        set(Calendar.SECOND, 0)
-                        set(Calendar.MILLISECOND, 0)
-                    }
-                    val inicioMes = calInicioMes.time
-                    val calFinMes = Calendar.getInstance().apply {
-                        set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
-                        set(Calendar.HOUR_OF_DAY, 23)
-                        set(Calendar.MINUTE, 59)
-                        set(Calendar.SECOND, 59)
-                        set(Calendar.MILLISECOND, 999)
-                    }
-                    val finMes = calFinMes.time
-
-                    var ingresosMes = 0.0
-                    val acumSiEnMes: (Date, Double) -> Unit = { fecha, monto ->
-                        if (fecha in inicioMes..finMes) ingresosMes += monto
-                    }
-                    registrosBordadoPlanchado.forEach { acumSiEnMes(it.fecha, it.monto) }
-                    registrosChompas.forEach { acumSiEnMes(it.fecha, it.monto) }
-                    registrosPonchos.forEach { acumSiEnMes(it.fecha, it.monto) }
-
-                    // Actualizar progreso de meta de ingresos (color y faltante)
-                    val meta = config.metaIngresos
-                    if (meta > 0) {
-                        val ingresosPeriodo = when (config.metaPeriodo) {
-                            "SEMANA" -> ingresosSemana
-                            "MES" -> ingresosMes
-                            else -> ingresos
-                        }
-                        val porcentajeRaw = (ingresosPeriodo / meta) * 100
-                        val porcentaje = porcentajeRaw.coerceIn(0.0, 100.0)
-                        progressMetaIngresos.max = 100
-                        progressMetaIngresos.progress = porcentaje.toInt()
-
-                        // Texto con faltante o superávit
-                        val diferencia = meta - ingresosPeriodo
-                        val textoFaltante = if (diferencia > 0) {
-                            "Faltan S/ ${String.format(Locale.getDefault(), "%.2f", diferencia)}"
-                        } else {
-                            val superavit = -diferencia
-                            "¡Meta superada por S/ ${String.format(Locale.getDefault(), "%.2f", superavit)}!"
-                        }
-                        val etiqueta = when (config.metaPeriodo) {
-                            "SEMANA" -> "semanal"
-                            "MES" -> "mensual"
-                            else -> "diaria"
-                        }
-                        tvMetaIngresos.text = "Meta $etiqueta: S/ ${String.format(Locale.getDefault(), "%.2f", meta)}  (" +
-                                "${String.format(Locale.getDefault(), "%.0f", porcentaje)}% - $textoFaltante)"
-
-                        // Detalle bajo la barra
-                        tvMetaDetalle.text = "Ingresos del periodo: S/ ${String.format(Locale.getDefault(), "%.2f", ingresosPeriodo)} / S/ ${String.format(Locale.getDefault(), "%.2f", meta)}"
-
-                        // Color dinámico de la barra según porcentaje
-                        val colorRes = when {
-                            porcentajeRaw < 50.0 -> R.color.error_color
-                            porcentajeRaw < 80.0 -> R.color.balance_yellow
-                            else -> R.color.balance_green
-                        }
-                        // setTint compatible
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                            progressMetaIngresos.progressTintList = android.content.res.ColorStateList.valueOf(resources.getColor(colorRes, theme))
-                        }
-
-                        tvMetaIngresos.visibility = View.VISIBLE
-                        progressMetaIngresos.visibility = View.VISIBLE
-                        tvMetaDetalle.visibility = View.VISIBLE
-                    } else {
-                        tvMetaIngresos.text = "Meta no establecida"
-                        progressMetaIngresos.progress = 0
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                            progressMetaIngresos.progressTintList = android.content.res.ColorStateList.valueOf(resources.getColor(R.color.primary_700, theme))
-                        }
-                        tvMetaIngresos.visibility = View.VISIBLE
-                        progressMetaIngresos.visibility = View.VISIBLE
-                        tvMetaDetalle.text = ""
-                        tvMetaDetalle.visibility = View.GONE
-                    }
                     
                     // Actualizar contador de registros
                     // Estos elementos no existen en el layout
@@ -1538,4 +1447,55 @@ class MainActivity : AppCompatActivity() {
         builder.setNegativeButton("Cancelar", null)
         builder.show()
     }
+}
+
+// ================= Utilidades de animación =================
+
+private fun View.pulse(onEnd: (() -> Unit)? = null) {
+    this.animate().scaleX(0.97f).scaleY(0.97f).setDuration(90)
+        .withEndAction {
+            this.animate().scaleX(1f).scaleY(1f).setDuration(110)
+                .withEndAction { onEnd?.invoke() }
+                .start()
+        }.start()
+}
+
+private fun applyPressAnimation(vararg views: View?) {
+    views.forEach { v ->
+        v?.setOnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    view.animate().scaleX(0.97f).scaleY(0.97f).setDuration(80).start()
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    view.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
+                }
+            }
+            false
+        }
+    }
+}
+
+private fun TextView.animateAmount(from: Double, to: Double, prefix: String = "") {
+    if (from == to) {
+        this.text = prefix + String.format(Locale.getDefault(), "%.2f", to)
+        return
+    }
+    val animator = ValueAnimator.ofFloat(from.toFloat(), to.toFloat())
+    animator.duration = 400
+    animator.interpolator = DecelerateInterpolator()
+    animator.addUpdateListener {
+        val value = it.animatedValue as Float
+        this.text = prefix + String.format(Locale.getDefault(), "%.2f", value)
+    }
+    animator.start()
+}
+
+private fun TextView.animateTextColor(targetColor: Int) {
+    val currentColor = this.currentTextColor
+    if (currentColor == targetColor) return
+    val colorAnim = ObjectAnimator.ofObject(this, "textColor", ArgbEvaluator(), currentColor, targetColor)
+    colorAnim.duration = 250
+    colorAnim.interpolator = AccelerateDecelerateInterpolator()
+    colorAnim.start()
 }
