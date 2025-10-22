@@ -99,6 +99,42 @@
                             android:textSize="@dimen/text_size_medium"
                             android:textStyle="bold"/>
                     </LinearLayout>
+
+                    <!-- Meta de ingresos y progreso -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <TextView
+                            android:id="@+id/tv_meta_ingresos"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Meta no establecida"
+                            android:textColor="@color/text_primary"
+                            android:textSize="@dimen/text_size_medium"
+                            android:layout_marginBottom="4dp" />
+
+                        <ProgressBar
+                            android:id="@+id/progress_meta_ingresos"
+                            style="@android:style/Widget.ProgressBar.Horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="10dp"
+                            android:progress="0"
+                            android:max="100"
+                            android:progressTint="@color/balance_green"
+                            android:backgroundTint="@color/primary_700" />
+
+                        <TextView
+                            android:id="@+id/tv_meta_detalle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_size_small"
+                            android:layout_marginTop="6dp" />
+                    </LinearLayout>
                     
                     <!-- Total Registros -->
                     <LinearLayout
@@ -130,7 +166,7 @@
                         android:id="@+id/btn_configuracion"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/configuracion"
+                        android:text="Meta de ingresos"
                         android:textColor="@color/button_text"
                         android:backgroundTint="@color/primary_500"
                         android:drawableStart="@android:drawable/ic_menu_preferences"
@@ -178,7 +214,8 @@
                             android:layout_marginEnd="@dimen/margin_medium"
                             android:text="@string/jefe_total_registros"
                             android:textColor="@color/balance_green"
-                            android:textSize="@dimen/text_size_medium" />
+                            android:textSize="@dimen/text_size_medium"
+                            android:visibility="gone" />
 
                         <TextView
                             android:id="@+id/tv_jefe_saldo"
@@ -513,5 +550,23 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+        <!-- Overlay de éxito: check verde redondo -->
+        <FrameLayout
+            android:id="@+id/success_check_overlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_success_check"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@drawable/success_circle"
+                android:padding="12dp"
+                android:src="@drawable/ic_check_white_24"
+                android:contentDescription="Éxito" />
+        </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

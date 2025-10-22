@@ -5,6 +5,11 @@
         name="external_files" 
         path="Documents" />
     
+    <!-- Permitir exponer cualquier subcarpeta del directorio de archivos externos de la app (incluye Download) -->
+    <external-files-path
+        name="external_files_all"
+        path="." />
+    
     <!-- Directorio público de documentos -->
     <external-path 
         name="external_documents" 

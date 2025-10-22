@@ -16,9 +16,9 @@
     <color name="dark_text">#FF1A1A1A</color>
     
     <!-- Colores para los saldos en modo claro -->
-    <color name="balance_green">#FF0097A7</color>
+    <color name="balance_green">#FF0AFA00</color>
     <color name="balance_blue">#FF1976D2</color>
-    <color name="balance_yellow">#FF0288D1</color>
+    <color name="balance_yellow">#FFF116</color>
     
     <!-- Gradientes para modo claro -->
     <color name="gradient_start">#FFFFFFFF</color>
@@ -37,8 +37,8 @@
     
     <!-- Estados -->
     <color name="accent_color">@color/primary_500</color>
-    <color name="error_color">#FFF44336</color>
-    <color name="success_color">#FF4CAF50</color>
+    <color name="error_color">#FF241A</color>
+    <color name="success_color">#FF0AFA00</color>
     <color name="warning_color">#FFFF9800</color>
     
     <!-- Tabla -->

@@ -14,9 +14,9 @@
     <color name="text_secondary">#FFCCCCCC</color>
     
     <!-- Colores para los saldos en modo oscuro -->
-    <color name="balance_green">#FF06B6D4</color>
+    <color name="balance_green">#FF0AFA00</color>
     <color name="balance_blue">#FF3B82F6</color>
-    <color name="balance_yellow">#FF0EA5E9</color>
+    <color name="balance_yellow">#FFF116</color>
     
     <!-- Gradientes para modo oscuro -->
     <color name="gradient_start">#FF1A1A1A</color>
@@ -34,8 +34,8 @@
     
     <!-- Estados -->
     <color name="accent_color">@color/primary_200</color>
-    <color name="error_color">#FFF44336</color>
-    <color name="success_color">#FF4CAF50</color>
+    <color name="error_color">#FF241A</color>
+    <color name="success_color">#FF0AFA00</color>
     <color name="warning_color">#FFFF9800</color>
     
     <!-- Tabla en modo oscuro -->

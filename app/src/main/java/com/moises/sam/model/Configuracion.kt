@@ -9,5 +9,7 @@ data class Configuracion(
     val formatoFecha: String = "dd/MM/yyyy",
     val adelantos: Double = 0.0,
     val saldoAcumulado: Double = 0.0,
+    val metaIngresos: Double = 0.0,
+    val metaPeriodo: String = "DIA",
     val ultimaModificacion: Date = Date()
 )

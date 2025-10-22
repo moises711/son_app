@@ -8,27 +8,60 @@
     android:background="@drawable/bg_modal_black">
 
     <TextView
-        android:id="@+id/tv_pago_title"
+        android:id="@+id/tv_meta_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Registrar Pago"
+        android:text="Meta de ingresos"
         android:textAlignment="center"
         android:textColor="@color/text_primary"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
 
+    <RadioGroup
+        android:id="@+id/rg_meta_periodo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="12dp">
+
+        <RadioButton
+            android:id="@+id/rb_meta_dia"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Día"
+            android:textColor="@color/text_primary"
+            android:checked="true"/>
+
+        <RadioButton
+            android:id="@+id/rb_meta_semana"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Semana"
+            android:textColor="@color/text_primary"
+            android:layout_marginStart="16dp"/>
+
+        <RadioButton
+            android:id="@+id/rb_meta_mes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mes"
+            android:textColor="@color/text_primary"
+            android:layout_marginStart="16dp"/>
+
+    </RadioGroup>
+
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Monto"
+        android:hint="Monto meta (S/)"
         app:hintTextColor="@color/balance_blue"
         android:textColorHint="@color/balance_blue"
         app:boxStrokeColor="@color/balance_blue"
         android:layout_marginBottom="16dp">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_pago_monto"
+            android:id="@+id/et_meta_monto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
@@ -37,58 +70,13 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Observación (opcional)"
-        app:hintTextColor="@color/balance_blue"
-        android:textColorHint="@color/balance_blue"
-        app:boxStrokeColor="@color/balance_blue"
-        android:layout_marginBottom="16dp">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_pago_observacion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:textColor="@color/text_primary"
-            android:backgroundTint="#33FFFFFF" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <RadioGroup
-        android:id="@+id/rg_tipo_pago"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="16dp">
-
-        <RadioButton
-            android:id="@+id/rb_pago"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pago"
-            android:textColor="@color/white"
-            android:checked="true"
-            android:layout_weight="1"/>
-
-        <RadioButton
-            android:id="@+id/rb_adelanto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Adelanto"
-            android:textColor="@color/white"
-            android:layout_weight="1"/>
-
-    </RadioGroup>
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/btn_pago_cancelar"
+            android:id="@+id/btn_meta_cancelar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -98,14 +86,13 @@
             android:layout_marginEnd="4dp" />
 
         <Button
-            android:id="@+id/btn_pago_registrar"
+            android:id="@+id/btn_meta_guardar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Registrar"
+            android:text="Guardar"
             android:textColor="@color/white"
-            android:textStyle="bold"
-            android:background="@drawable/button_bordered_accent"
+            android:background="@drawable/button_accent_gradient"
             android:layout_marginStart="4dp" />
 
     </LinearLayout>
