@@ -26,6 +26,11 @@ import android.animation.ObjectAnimator
 import android.animation.AnimatorSet
 import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
+import android.graphics.Typeface
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -322,6 +327,11 @@ class MainActivity : AppCompatActivity() {
 
             dialog.show()
         }
+
+        // Al tocar la tarjeta de "Saldo General" se muestran todos los registros combinados (3 widgets)
+        findViewById<View>(R.id.card_saldo_general)?.setOnClickListener {
+            mostrarDialogoVerRegistrosTodos()
+        }
     }
     
     /**
@@ -545,7 +555,6 @@ class MainActivity : AppCompatActivity() {
     // Usar los IDs correctos del layout dialog_pago_adelanto
     val tvTitulo = view.findViewById<TextView>(R.id.tv_pago_title)
         val etMonto = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_pago_monto)
-        val etObservacion = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_pago_observacion)
         val btnRegistrar = view.findViewById<Button>(R.id.btn_pago_registrar)
         val btnCancelar = view.findViewById<Button>(R.id.btn_pago_cancelar)
         
@@ -562,8 +571,6 @@ class MainActivity : AppCompatActivity() {
             val montoText = etMonto.text.toString()
             if (montoText.isNotEmpty()) {
                 val monto = montoText.toDouble()
-                val observacion = etObservacion.text.toString()
-                
                 lifecycleScope.launch {
                     // Unificamos: registrar como pago con observación según tipo
                     val tipoObservacion = when (tipoServicio) {
@@ -573,7 +580,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     val pago = Pago(
                         monto = monto,
-                        observacion = "$tipoObservacion: $observacion"
+                        observacion = tipoObservacion
                     )
                     repository.savePago(pago)
                     actualizarRegistrosConPago(tipoServicio, monto)
@@ -672,10 +679,7 @@ class MainActivity : AppCompatActivity() {
     dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
 
         // IDs válidos en dialog_pago_adelanto.xml
-        val etMonto = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_pago_monto)
-        val etObservacion = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_pago_observacion)
-        val rbPago = view.findViewById<android.widget.RadioButton>(R.id.rb_pago)
-        val rbAdelanto = view.findViewById<android.widget.RadioButton>(R.id.rb_adelanto)
+            val etMonto = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.et_pago_monto)
         val btnCancelar = view.findViewById<Button>(R.id.btn_pago_cancelar)
         val btnRegistrar = view.findViewById<Button>(R.id.btn_pago_registrar)
 
@@ -685,24 +689,14 @@ class MainActivity : AppCompatActivity() {
             val montoText = etMonto.text?.toString().orEmpty()
             if (montoText.isNotEmpty()) {
                 val monto = montoText.toDoubleOrNull() ?: 0.0
-                val observacion = etObservacion.text?.toString().orEmpty()
                 lifecycleScope.launch {
-                    if (rbPago.isChecked) {
-                        val tipoObs = "PAGO_JEFE" // o según contexto si se pasa tipoServicio
-                        repository.savePago(Pago(monto = monto, observacion = "$tipoObs: $observacion"))
-                        withContext(Dispatchers.Main) {
-                            actualizarSaldos()
-                            Toast.makeText(this@MainActivity, "Pago registrado: S/. $monto", Toast.LENGTH_SHORT).show()
-                            dialog.dismiss()
-                        }
-                    } else if (rbAdelanto.isChecked) {
-                        val tipoObs = "ADELANTO_JEFE"
-                        repository.saveAdelanto(Adelanto(monto = monto, observacion = "$tipoObs: $observacion"))
-                        withContext(Dispatchers.Main) {
-                            actualizarSaldos()
-                            mostrarCheckExito()
-                            dialog.dismiss()
-                        }
+                    // Este diálogo queda dedicado a registrar Adelantos del Jefe
+                    val tipoObs = "ADELANTO_JEFE"
+                    repository.saveAdelanto(Adelanto(monto = monto, observacion = tipoObs))
+                    withContext(Dispatchers.Main) {
+                        actualizarSaldos()
+                        mostrarCheckExito()
+                        dialog.dismiss()
                     }
                 }
             } else {
@@ -726,8 +720,7 @@ class MainActivity : AppCompatActivity() {
         val tableAdelantos = view.findViewById<TableLayout>(R.id.table_adelantos)
         val tvNoRecords = view.findViewById<TextView>(R.id.tv_no_adelantos)
         val btnClose = view.findViewById<Button>(R.id.btn_close)
-        val etMonto = view.findViewById<TextInputEditText>(R.id.et_adelanto_monto)
-        val etObs = view.findViewById<TextInputEditText>(R.id.et_adelanto_observacion)
+    val etMonto = view.findViewById<TextInputEditText>(R.id.et_adelanto_monto)
         val btnAdd = view.findViewById<Button>(R.id.btn_add_adelanto)
 
         lifecycleScope.launch {
@@ -776,11 +769,9 @@ class MainActivity : AppCompatActivity() {
                 etMonto.error = "Ingrese un monto válido"
                 return@setOnClickListener
             }
-            val observacion = etObs.text?.toString().orEmpty()
-
             lifecycleScope.launch {
                 withContext(Dispatchers.IO) {
-                    repository.saveAdelanto(Adelanto(monto = monto, observacion = "ADELANTO_JEFE: $observacion"))
+                    repository.saveAdelanto(Adelanto(monto = monto, observacion = "ADELANTO_JEFE"))
                 }
                 withContext(Dispatchers.Main) {
                     // Mostrar éxito y cerrar el diálogo tras registrar el adelanto
@@ -928,32 +919,96 @@ class MainActivity : AppCompatActivity() {
                 
                 // Calcular saldos netos basados únicamente en registros existentes
                 // Los pagos ya están reflejados al eliminar/reducir registros en actualizarRegistrosConPago
-                var saldoChompas = 0.0
+                var totalChompas = 0.0
                 registrosChompas.forEach { registro ->
-                    saldoChompas += registro.monto
+                    totalChompas += registro.monto
                 }
                 // Restar créditos (excedentes de pago) para Clemente
                 val creditoChompa = repository.getCreditoMonto(TipoServicio.CHOMPA)
-                saldoChompas -= creditoChompa
+                val saldoChompas = totalChompas - creditoChompa
                 // Ya no restamos los pagos porque se han eliminado los registros correspondientes
                 
-                var saldoPonchos = 0.0
+                var totalPonchos = 0.0
                 registrosPonchos.forEach { registro ->
-                    saldoPonchos += registro.monto
+                    totalPonchos += registro.monto
                 }
                 // Restar créditos (excedentes de pago) para Lalo
                 val creditoPoncho = repository.getCreditoMonto(TipoServicio.PONCHO)
-                saldoPonchos -= creditoPoncho
+                val saldoPonchos = totalPonchos - creditoPoncho
                 // Ya no restamos los pagos porque se han eliminado los registros correspondientes
+
+                // ===================== Meta de ingresos (DIA / SEMANA / MES) =====================
+                // Calcular rango de fechas del período configurado y sumar ingresos de ese período
+                val calInicioPeriodo = Calendar.getInstance()
+                val calFinPeriodo = Calendar.getInstance()
+                when (config.metaPeriodo.uppercase(Locale.getDefault())) {
+                    "SEMANA" -> {
+                        // Inicio: lunes de la semana actual, 00:00:00
+                        calInicioPeriodo.firstDayOfWeek = Calendar.MONDAY
+                        calInicioPeriodo.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+                        calInicioPeriodo.set(Calendar.HOUR_OF_DAY, 0)
+                        calInicioPeriodo.set(Calendar.MINUTE, 0)
+                        calInicioPeriodo.set(Calendar.SECOND, 0)
+                        calInicioPeriodo.set(Calendar.MILLISECOND, 0)
+
+                        // Fin: domingo (lunes + 6 días), 23:59:59.999
+                        calFinPeriodo.time = calInicioPeriodo.time
+                        calFinPeriodo.add(Calendar.DAY_OF_YEAR, 6)
+                        calFinPeriodo.set(Calendar.HOUR_OF_DAY, 23)
+                        calFinPeriodo.set(Calendar.MINUTE, 59)
+                        calFinPeriodo.set(Calendar.SECOND, 59)
+                        calFinPeriodo.set(Calendar.MILLISECOND, 999)
+                    }
+                    "MES" -> {
+                        // Inicio: primer día del mes, 00:00:00
+                        calInicioPeriodo.set(Calendar.DAY_OF_MONTH, 1)
+                        calInicioPeriodo.set(Calendar.HOUR_OF_DAY, 0)
+                        calInicioPeriodo.set(Calendar.MINUTE, 0)
+                        calInicioPeriodo.set(Calendar.SECOND, 0)
+                        calInicioPeriodo.set(Calendar.MILLISECOND, 0)
+
+                        // Fin: último día del mes, 23:59:59.999
+                        calFinPeriodo.time = calInicioPeriodo.time
+                        calFinPeriodo.add(Calendar.MONTH, 1)
+                        calFinPeriodo.add(Calendar.MILLISECOND, -1) // un ms antes del próximo mes
+                    }
+                    else -> {
+                        // DIA por defecto
+                        calInicioPeriodo.set(Calendar.HOUR_OF_DAY, 0)
+                        calInicioPeriodo.set(Calendar.MINUTE, 0)
+                        calInicioPeriodo.set(Calendar.SECOND, 0)
+                        calInicioPeriodo.set(Calendar.MILLISECOND, 0)
+
+                        calFinPeriodo.set(Calendar.HOUR_OF_DAY, 23)
+                        calFinPeriodo.set(Calendar.MINUTE, 59)
+                        calFinPeriodo.set(Calendar.SECOND, 59)
+                        calFinPeriodo.set(Calendar.MILLISECOND, 999)
+                    }
+                }
+
+                val fechaInicioPeriodo = calInicioPeriodo.time
+                val fechaFinPeriodo = calFinPeriodo.time
+
+                var ingresosPeriodo = 0.0
+                (registrosBordadoPlanchado + registrosChompas + registrosPonchos).forEach { registro ->
+                    if (registro.fecha in fechaInicioPeriodo..fechaFinPeriodo) {
+                        ingresosPeriodo += registro.monto
+                    }
+                }
 
                 // Actualizar UI en hilo principal
                 withContext(Dispatchers.Main) {
                     // Jefe (Bordado y Planchado)
-                    tvJefeSaldos.text = "BP: S/ ${String.format(Locale.getDefault(), "%.2f", saldoBordadoPlanchado)}"
-                    val jefeSaldoFinal = saldoBordadoPlanchado + saldoAcumulado - config.adelantos
+                    // Mostrar solo "Total"
+                    tvJefeSaldos.text = "Total: S/ ${String.format(Locale.getDefault(), "%.2f", saldoBordadoPlanchado)}"
+                    tvJefeSaldos.setTextColor(resources.getColor(R.color.text_primary, theme))
+                    // Regla: El saldo del Jefe NO debe moverse con los registros del período actual.
+                    // Solo refleja el saldo acumulado previo, menos adelantos pendientes.
+                    val jefeSaldoFinal = saldoAcumulado - totalAdelantos
                     tvJefeSaldo.text = "Saldo: S/ ${String.format(Locale.getDefault(), "%.2f", jefeSaldoFinal)}"
                     if (jefeSaldoFinal > 0) {
-                        tvJefeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
+                        // Antes era amarillo; ahora negro (texto principal)
+                        tvJefeSaldo.setTextColor(resources.getColor(R.color.text_primary, theme))
                     } else if (jefeSaldoFinal < 0) {
                         tvJefeSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
                     } else {
@@ -966,30 +1021,74 @@ class MainActivity : AppCompatActivity() {
 
                     // Chompas (Clemente)
                     tvChompasNumero.text = registrosChompas.size.toString()
-                    tvClementeSaldo.text = "Saldo: S/ ${String.format(Locale.getDefault(), "%.2f", saldoChompas)}"
-                    if (saldoChompas > 0) {
-                        tvClementeSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
-                    } else if (saldoChompas < 0) {
-                        tvClementeSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
-                    } else {
-                        tvClementeSaldo.setTextColor(resources.getColor(R.color.success_color, theme))
+                    // Reglas: Solo dos textos (Total y Adelanto). Total en verde, Adelanto en azul.
+                    // Si no hay ninguno (ambos 0), mostrar Total 0 en rojo.
+                    when {
+                        totalChompas > 0.0 -> {
+                            // Total de registros pendiente (verde)
+                            setSaldoStyled(
+                                tvClementeSaldo,
+                                label = "Total",
+                                amount = totalChompas,
+                                amountColor = resources.getColor(R.color.success_color, theme)
+                            )
+                        }
+                        saldoChompas < 0.0 -> {
+                            // Pago extra: Adelanto (azul)
+                            setSaldoStyled(
+                                tvClementeSaldo,
+                                label = "Adelanto",
+                                amount = kotlin.math.abs(saldoChompas),
+                                amountColor = resources.getColor(R.color.balance_blue, theme)
+                            )
+                        }
+                        else -> {
+                            // Ninguno: solo cifra S/ 0.00 en rojo (sin etiqueta)
+                            setSaldoStyledSimple(
+                                tvClementeSaldo,
+                                amount = 0.0,
+                                amountColor = resources.getColor(R.color.error_color, theme)
+                            )
+                        }
                     }
 
                     // Ponchos (Lalo)
                     tvPonchosNumero.text = registrosPonchos.size.toString()
-                    tvLaloSaldo.text = "Saldo: S/ ${String.format(Locale.getDefault(), "%.2f", saldoPonchos)}"
-                    if (saldoPonchos > 0) {
-                        tvLaloSaldo.setTextColor(resources.getColor(R.color.balance_yellow, theme))
-                    } else if (saldoPonchos < 0) {
-                        tvLaloSaldo.setTextColor(resources.getColor(R.color.error_color, theme))
-                    } else {
-                        tvLaloSaldo.setTextColor(resources.getColor(R.color.success_color, theme))
+                    // Mismas reglas que Clemente: Total (verde), Adelanto (azul), ninguno (Total 0 en rojo)
+                    when {
+                        totalPonchos > 0.0 -> {
+                            // Total de registros pendiente (verde)
+                            setSaldoStyled(
+                                tvLaloSaldo,
+                                label = "Total",
+                                amount = totalPonchos,
+                                amountColor = resources.getColor(R.color.success_color, theme)
+                            )
+                        }
+                        saldoPonchos < 0.0 -> {
+                            // Pago extra: Adelanto (azul)
+                            setSaldoStyled(
+                                tvLaloSaldo,
+                                label = "Adelanto",
+                                amount = kotlin.math.abs(saldoPonchos),
+                                amountColor = resources.getColor(R.color.balance_blue, theme)
+                            )
+                        }
+                        else -> {
+                            // Ninguno: solo cifra S/ 0.00 en rojo (sin etiqueta)
+                            setSaldoStyledSimple(
+                                tvLaloSaldo,
+                                amount = 0.0,
+                                amountColor = resources.getColor(R.color.error_color, theme)
+                            )
+                        }
                     }
 
-                    // Saldo general (suma de todos los saldos)
-                    val saldoGeneral = jefeSaldoFinal + saldoChompas + saldoPonchos
-                    tvSaldoGeneral.animateAmount(lastSaldoGeneral, saldoGeneral, prefix = "S/ ")
-                    lastSaldoGeneral = saldoGeneral
+                    // Saldo general ahora muestra la suma de TODOS los totales de registros de los 3 widgets
+                    // (Bordado/Planchado + Chompas + Ponchos), sin mezclar con saldos/acumulados.
+                    val totalGeneralRegistros = totalMontoRegistrosJefe + totalChompas + totalPonchos
+                    tvSaldoGeneral.animateAmount(lastSaldoGeneral, totalGeneralRegistros, prefix = "S/ ")
+                    lastSaldoGeneral = totalGeneralRegistros
                     
                     // Calcular ingresos del día
                     val hoy = Calendar.getInstance()
@@ -1028,6 +1127,42 @@ class MainActivity : AppCompatActivity() {
                     }
                     
                     tvIngresosHoy.text = "S/ ${String.format(Locale.getDefault(), "%.2f", ingresos)}"
+
+                    // ===================== Actualizar barra de progreso de Meta =====================
+                    val meta = config.metaIngresos
+                    if (meta > 0.0) {
+                        val periodoLabel = when (config.metaPeriodo.uppercase(Locale.getDefault())) {
+                            "SEMANA" -> "SEMANA"
+                            "MES" -> "MES"
+                            else -> "DÍA"
+                        }
+                        tvMetaIngresos.text = "Meta (${periodoLabel}): S/ ${String.format(Locale.getDefault(), "%.2f", meta)}"
+
+                        val porcentaje = ((ingresosPeriodo / meta) * 100).toInt().coerceIn(0, 100)
+
+                        // Animar progreso suavemente
+                        val fromProgress = progressMetaIngresos.progress
+                        ObjectAnimator.ofInt(progressMetaIngresos, "progress", fromProgress, porcentaje).apply {
+                            duration = 500
+                            interpolator = DecelerateInterpolator()
+                            start()
+                        }
+
+                        // Tint dinámico según progreso
+                        val tintColor = when {
+                            porcentaje >= 80 -> resources.getColor(R.color.progress_green_dark, theme) // casi lleno (verde oscuro)
+                            porcentaje >= 40 -> resources.getColor(R.color.progress_yellow_dark, theme) // intermedio (amarillo oscuro)
+                            else -> resources.getColor(R.color.error_color, theme) // bajo (rojo)
+                        }
+                        progressMetaIngresos.progressTintList = android.content.res.ColorStateList.valueOf(tintColor)
+
+                        tvMetaDetalle.text = "Progreso: S/ ${String.format(Locale.getDefault(), "%.2f", ingresosPeriodo)} de S/ ${String.format(Locale.getDefault(), "%.2f", meta)} (${porcentaje}%)"
+                    } else {
+                        tvMetaIngresos.text = "Meta no establecida"
+                        progressMetaIngresos.progress = 0
+                        progressMetaIngresos.progressTintList = android.content.res.ColorStateList.valueOf(resources.getColor(R.color.primary_500, theme))
+                        tvMetaDetalle.text = "Configura tu meta de ingresos con el botón \"Meta de ingresos\""
+                    }
                     
                     // Actualizar contador de registros
                     // Estos elementos no existen en el layout
@@ -1213,6 +1348,105 @@ class MainActivity : AppCompatActivity() {
                     tableRow.addView(tvMonto)
 
                     tableRegistros.addView(tableRow)
+                }
+            }
+
+            btnClose.setOnClickListener { dialog.dismiss() }
+
+            withContext(Dispatchers.Main) { dialog.show() }
+        }
+    }
+
+    /**
+     * Muestra un diálogo con TODOS los registros combinados de los 3 widgets:
+     * - Jefe (Bordado/Planchado)
+     * - Clemente (Chompas)
+     * - Lalo (Ponchos)
+     */
+    private fun mostrarDialogoVerRegistrosTodos() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_ver_registros, null)
+        val builder = AlertDialog.Builder(this)
+        builder.setView(dialogView)
+
+        val tvTitle = dialogView.findViewById<TextView>(R.id.tv_dialog_title)
+        tvTitle.text = "Todos los registros"
+
+        val dialog = builder.create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog.window?.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+        dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
+
+        lifecycleScope.launch {
+            val tableRegistros = dialogView.findViewById<TableLayout>(R.id.table_registros)
+            val tvNoRecords = dialogView.findViewById<TextView>(R.id.tv_no_records)
+            val btnClose = dialogView.findViewById<Button>(R.id.btn_close)
+
+            val context = this@MainActivity
+
+            val registrosBp = withContext(Dispatchers.IO) { repository.getRegistrosBordadoPlanchado() }
+            val registrosCh = withContext(Dispatchers.IO) { repository.getRegistrosChompas() }
+            val registrosPo = withContext(Dispatchers.IO) { repository.getRegistrosPonchos() }
+
+            // Armar lista unificada con columnas [Fecha, Tipo, Cantidad, Monto]
+            data class Item(val fecha: Date, val tipo: String, val cantidad: Int, val monto: Double)
+
+            val items = mutableListOf<Item>()
+            registrosBp.forEach { r ->
+                items += Item(r.fecha, r.tipoBordado ?: r.tipo, r.cantidad, r.monto)
+            }
+            registrosCh.forEach { r ->
+                items += Item(r.fecha, r.tipo, r.cantidad, r.monto)
+            }
+            registrosPo.forEach { r ->
+                items += Item(r.fecha, r.tipo, r.cantidad, r.monto)
+            }
+
+            if (items.isEmpty()) {
+                tableRegistros.visibility = View.GONE
+                tvNoRecords.visibility = View.VISIBLE
+            } else {
+                tvNoRecords.visibility = View.GONE
+                tableRegistros.visibility = View.VISIBLE
+
+                // Limpiar filas previas (dejar encabezado)
+                if (tableRegistros.childCount > 1) {
+                    tableRegistros.removeViews(1, tableRegistros.childCount - 1)
+                }
+
+                val dateFormat = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
+                items.sortedByDescending { it.fecha }.forEach { item ->
+                    val fechaStr = dateFormat.format(item.fecha)
+
+                    val row = TableRow(context)
+                    row.layoutParams = TableRow.LayoutParams(
+                        TableRow.LayoutParams.MATCH_PARENT,
+                        TableRow.LayoutParams.WRAP_CONTENT
+                    )
+                    row.setPadding(5, 10, 5, 10)
+
+                    val tvFecha = TextView(context).apply {
+                        text = fechaStr
+                        setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
+                    }
+                    val tvTipo = TextView(context).apply {
+                        text = item.tipo
+                        setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
+                    }
+                    val tvCantidad = TextView(context).apply {
+                        text = item.cantidad.toString()
+                        setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
+                    }
+                    val tvMonto = TextView(context).apply {
+                        text = String.format(Locale.getDefault(), "%.2f", item.monto)
+                        setTextColor(context.resources.getColor(R.color.text_primary, context.theme))
+                    }
+
+                    row.addView(tvFecha)
+                    row.addView(tvTipo)
+                    row.addView(tvCantidad)
+                    row.addView(tvMonto)
+
+                    tableRegistros.addView(row)
                 }
             }
 
@@ -1450,6 +1684,31 @@ class MainActivity : AppCompatActivity() {
 }
 
 // ================= Utilidades de animación =================
+
+// Estiliza un TextView con etiqueta (color según tema) y monto (color según estado)
+private fun setSaldoStyled(view: TextView, label: String, amount: Double, amountColor: Int) {
+    val context = view.context
+    val amountText = String.format(Locale.getDefault(), "S/ %.2f", amount)
+    val full = "$label: $amountText"
+    val labelEnd = label.length
+    val ssb = SpannableStringBuilder(full)
+    // Color para etiqueta acorde a tema (negro en día, blanco en noche)
+    val labelColor = context.resources.getColor(R.color.text_primary, context.theme)
+    ssb.setSpan(ForegroundColorSpan(labelColor), 0, labelEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    // Monto en negrita y color dinámico
+    val amountStart = labelEnd + 2 // después de ': '
+    ssb.setSpan(StyleSpan(Typeface.BOLD), amountStart, full.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    ssb.setSpan(ForegroundColorSpan(amountColor), amountStart, full.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    view.setText(ssb, TextView.BufferType.SPANNABLE)
+}
+
+// Muestra solo la cifra (sin etiqueta), con color de monto según estado
+private fun setSaldoStyledSimple(view: TextView, amount: Double, amountColor: Int) {
+    val amountText = String.format(Locale.getDefault(), "S/ %.2f", amount)
+    view.text = amountText
+    view.setTextColor(amountColor)
+    view.setTypeface(view.typeface, android.graphics.Typeface.BOLD)
+}
 
 private fun View.pulse(onEnd: (() -> Unit)? = null) {
     this.animate().scaleX(0.97f).scaleY(0.97f).setDuration(90)

@@ -40,6 +40,10 @@
     <color name="error_color">#FF241A</color>
     <color name="success_color">#FF0AFA00</color>
     <color name="warning_color">#FFFF9800</color>
+
+    <!-- Colores específicos para progreso (ligeramente más oscuros) -->
+    <color name="progress_green_dark">#10F500</color>
+    <color name="progress_yellow_dark">#F5C401</color>
     
     <!-- Tabla -->
     <color name="table_row_even">#FFEEEEEE</color>

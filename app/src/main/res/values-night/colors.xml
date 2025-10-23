@@ -37,6 +37,10 @@
     <color name="error_color">#FF241A</color>
     <color name="success_color">#FF0AFA00</color>
     <color name="warning_color">#FFFF9800</color>
+
+    <!-- Colores específicos para progreso en modo oscuro (un poco más oscuros para mejor contraste) -->
+    <color name="progress_green_dark">#10F500</color>
+    <color name="progress_yellow_dark">#F5C401</color>
     
     <!-- Tabla en modo oscuro -->
     <color name="table_row_even">#33FFFFFF</color>

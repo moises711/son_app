@@ -50,55 +50,98 @@
                         android:gravity="center"
                         android:layout_marginBottom="8dp"/>
                         
-                    <!-- Saldo General -->
+                    <!-- Métricas en tarjetas (Saldo General / Ingresos Hoy) -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
-                        
-                        <TextView
+                        android:layout_marginBottom="8dp"
+                        android:weightSum="2">
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/card_saldo_general"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/saldo_general_etiqueta"
-                            android:textSize="@dimen/text_size_medium"
-                            android:textColor="@color/text_primary"/>
-                            
-                        <TextView
-                            android:id="@+id/tv_saldo_general"
-                            android:layout_width="wrap_content"
+                            android:layout_marginEnd="6dp"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="2dp"
+                            app:strokeColor="@color/widget_border"
+                            app:strokeWidth="1dp"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:foreground="?attr/selectableItemBackground">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="12dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/saldo_general_etiqueta"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="@dimen/text_size_small"/>
+
+                                <TextView
+                                    android:id="@+id/tv_saldo_general"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:gravity="end"
+                                    android:text="@string/saldo_general_label"
+                                    android:textColor="@color/balance_blue"
+                                    android:textSize="@dimen/text_size_medium"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="@string/saldo_general_label"
-                            android:textColor="@color/balance_blue"
-                            android:textSize="@dimen/text_size_medium"
-                            android:textStyle="bold"/>
+                            android:layout_weight="1"
+                            android:layout_marginStart="6dp"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="2dp"
+                            app:strokeColor="@color/widget_border"
+                            app:strokeWidth="1dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:padding="12dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/ingresos_hoy_etiqueta"
+                                    android:textColor="@color/text_secondary"
+                                    android:textSize="@dimen/text_size_small"/>
+
+                                <TextView
+                                    android:id="@+id/tv_ingresos_hoy"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:gravity="end"
+                                    android:text="@string/ingresos_hoy_valor"
+                                    android:textColor="@color/success_color"
+                                    android:textSize="@dimen/text_size_medium"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
                     </LinearLayout>
-                    
-                    <!-- Ingresos del día -->
-                    <LinearLayout
+
+                    <!-- Divisor sutil entre métricas y meta -->
+                    <View
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="8dp">
-                        
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/ingresos_hoy_etiqueta"
-                            android:textSize="@dimen/text_size_medium"
-                            android:textColor="@color/text_primary"/>
-                            
-                        <TextView
-                            android:id="@+id/tv_ingresos_hoy"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/ingresos_hoy_valor"
-                            android:textColor="@color/success_color"
-                            android:textSize="@dimen/text_size_medium"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
+                        android:layout_height="1dp"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@color/widget_border" />
 
                     <!-- Meta de ingresos y progreso -->
                     <LinearLayout
@@ -223,7 +266,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/margin_medium"
                             android:text="@string/jefe_saldo"
-                            android:textColor="@color/balance_yellow"
+                            android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_medium" />
 
                         <TextView
@@ -232,7 +275,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/margin_large"
                             android:text="@string/jefe_saldos"
-                            android:textColor="@color/balance_blue"
+                            android:textColor="@color/text_primary"
                             android:textSize="@dimen/text_size_medium" />
                     </LinearLayout>
 

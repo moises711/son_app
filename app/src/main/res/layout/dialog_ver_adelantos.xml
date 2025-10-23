@@ -90,24 +90,7 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Observación (opcional)"
-        app:hintTextColor="@color/balance_blue"
-        android:textColorHint="@color/balance_blue"
-        app:boxStrokeColor="@color/balance_blue"
-        android:layout_marginTop="8dp">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_adelanto_observacion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:textColor="@color/text_primary"
-            android:backgroundTint="#33FFFFFF" />
-
-    </com.google.android.material.textfield.TextInputLayout>
+    
 
     <Button
         android:id="@+id/btn_add_adelanto"

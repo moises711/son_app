@@ -37,50 +37,9 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Observación (opcional)"
-        app:hintTextColor="@color/balance_blue"
-        android:textColorHint="@color/balance_blue"
-        app:boxStrokeColor="@color/balance_blue"
-        android:layout_marginBottom="16dp">
+    
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/et_pago_observacion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:textColor="@color/text_primary"
-            android:backgroundTint="#33FFFFFF" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <RadioGroup
-        android:id="@+id/rg_tipo_pago"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="16dp">
-
-        <RadioButton
-            android:id="@+id/rb_pago"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pago"
-            android:textColor="@color/white"
-            android:checked="true"
-            android:layout_weight="1"/>
-
-        <RadioButton
-            android:id="@+id/rb_adelanto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Adelanto"
-            android:textColor="@color/white"
-            android:layout_weight="1"/>
-
-    </RadioGroup>
+    
 
     <LinearLayout
         android:layout_width="match_parent"
