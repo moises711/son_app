@@ -108,7 +108,9 @@ class PdfGenerator(private val context: Context) {
             
             // Agrupar registros por tipo de servicio
             val registrosPorTipo: Map<TipoServicio, List<Registro>> = registros.groupBy { it.tipo }
-            
+            // Guardar en carpeta pública 'SAM_PDF' en la raíz del almacenamiento externo
+            val pdfDir = File(Environment.getExternalStorageDirectory(), "SAM_PDF")
+            pdfDir.mkdirs()
             var y = 90f
             var totalGeneralServicios = 0.0
             

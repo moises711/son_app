@@ -10,11 +10,11 @@
     <!-- Colores principales para la UI en modo oscuro -->
     <color name="app_background">#FF0F0F0F</color>
     <color name="card_background">#FF1A1A1A</color>
-    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_primary">#FFFFFFFF</color> <!-- Blanco para noche -->
     <color name="text_secondary">#FFCCCCCC</color>
     
     <!-- Colores para los saldos en modo oscuro -->
-    <color name="balance_green">#FF0AFA00</color>
+    <color name="balance_green">#FF25D366</color> <!-- Verde WhatsApp -->
     <color name="balance_blue">#FF3B82F6</color>
     <color name="balance_yellow">#FFF116</color>
     
@@ -35,11 +35,11 @@
     <!-- Estados -->
     <color name="accent_color">@color/primary_200</color>
     <color name="error_color">#FF241A</color>
-    <color name="success_color">#FF0AFA00</color>
+    <color name="success_color">#FF25D366</color> <!-- Verde WhatsApp -->
     <color name="warning_color">#FFFF9800</color>
 
     <!-- Colores específicos para progreso en modo oscuro (un poco más oscuros para mejor contraste) -->
-    <color name="progress_green_dark">#10F500</color>
+    <color name="progress_green_dark">#FF25D366</color> <!-- Verde WhatsApp -->
     <color name="progress_yellow_dark">#F5C401</color>
     
     <!-- Tabla en modo oscuro -->
