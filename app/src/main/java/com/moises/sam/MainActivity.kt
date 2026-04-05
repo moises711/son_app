@@ -201,7 +201,8 @@ class MainActivity : AppCompatActivity() {
         // Animación de presión para botones principales
         applyPressAnimation(
             btnBordado, btnPlanchado, btnDescargarPdf, btnAdelantos, btnConfiguracion,
-            btnRegistroClemente, btnPagosClemente, btnRegistroLalo, btnPagosLalo
+            btnRegistroClemente, btnPagosClemente, btnRegistroLalo, btnPagosLalo,
+            findViewById(R.id.btn_ayuda)
         )
     }
     
@@ -331,6 +332,11 @@ class MainActivity : AppCompatActivity() {
         // Al tocar la tarjeta de "Saldo General" se muestran todos los registros combinados (3 widgets)
         findViewById<View>(R.id.card_saldo_general)?.setOnClickListener {
             mostrarDialogoVerRegistrosTodos()
+        }
+
+        // Botón de Ayuda: muestra qué puede hacer la aplicación
+        findViewById<Button>(R.id.btn_ayuda).setOnClickListener {
+            mostrarDialogoAyuda()
         }
     }
     
@@ -664,6 +670,25 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
     
+    /**
+     * Muestra el diálogo de ayuda con las funcionalidades de la aplicación
+     */
+    private fun mostrarDialogoAyuda() {
+        val contenido = HtmlCompat.fromHtml(
+            getString(R.string.ayuda_contenido),
+            HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.ayuda_titulo))
+            .setMessage(contenido)
+            .setPositiveButton(getString(R.string.cerrar)) { dialog, _ -> dialog.dismiss() }
+            .create()
+            .also { dialog ->
+                dialog.window?.attributes = dialog.window?.attributes?.apply { dimAmount = 0.6f }
+                dialog.show()
+            }
+    }
+
     /**
      * Muestra el diálogo de adelantos
      */

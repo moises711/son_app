@@ -75,4 +75,38 @@
     <string name="monto">Monto</string>
     <string name="observacion_opcional">Observación (opcional)</string>
 
+    <!-- Strings para diálogo de ayuda -->
+    <string name="ayuda">¿Qué puedo hacer?</string>
+    <string name="ayuda_titulo">¿Qué puedes hacer con SAM?</string>
+    <string name="ayuda_contenido"><![CDATA[
+<b>📋 Registrar Servicios</b><br/>
+• <b>Bordado</b>: registrar piezas de bordado (Troyer, Molde, Chompas de Lana) a S/ 0.50 por unidad.<br/>
+• <b>Planchado</b>: registrar piezas de planchado a S/ 1.00 por unidad.<br/>
+• <b>Chompas (Clemente)</b>: registrar chompas planchadas a S/ 1.00 c/u.<br/>
+• <b>Ponchos (Lalo)</b>: registrar ponchos planchados a S/ 2.50 c/u.<br/><br/>
+
+<b>💰 Gestionar Pagos y Adelantos</b><br/>
+• Registra pagos recibidos de cada persona.<br/>
+• Añade adelantos que se descuentan del saldo pendiente.<br/>
+• Consulta el historial de adelantos en cualquier momento.<br/><br/>
+
+<b>📊 Estado Financiero</b><br/>
+• Consulta el <b>saldo general</b> acumulado de todos los servicios.<br/>
+• Ve los <b>ingresos del día</b> en tiempo real.<br/>
+• Establece una <b>meta de ingresos</b> (diaria, semanal o mensual) y sigue tu progreso.<br/><br/>
+
+<b>📄 Generar PDF</b><br/>
+• Genera un reporte PDF de los registros del Jefe con detalle de servicios y pagos.<br/>
+• El PDF incluye un espacio para firma y se guarda en el almacenamiento del dispositivo.<br/><br/>
+
+<b>📜 Ver Historial</b><br/>
+• Revisa todos los registros anteriores de cada persona (Jefe, Clemente, Lalo).<br/>
+• Los saldos se actualizan automáticamente con cada registro o pago.<br/><br/>
+
+<b>🎨 Indicadores de Saldo</b><br/>
+• <font color="#FFC107">Amarillo</font>: te deben dinero (saldo positivo).<br/>
+• <font color="#4CAF50">Verde</font>: saldo en cero.<br/>
+• <font color="#F44336">Rojo</font>: tú debes dinero (saldo negativo).
+    ]]></string>
+
 </resources>

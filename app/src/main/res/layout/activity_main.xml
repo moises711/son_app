@@ -204,17 +204,40 @@
                             android:textStyle="bold" />
                     </LinearLayout>
 
-                    <!-- Botón de Configuración -->
-                    <Button
-                        android:id="@+id/btn_configuracion"
+                    <!-- Fila inferior: Configuración + Ayuda -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:backgroundTint="@color/primary_500"
-                        android:drawableStart="@android:drawable/ic_menu_preferences"
-                        android:drawableTint="@color/white"
-                        android:gravity="center"
-                        android:text="Meta de ingresos"
-                        android:textColor="@color/button_text" />
+                        android:orientation="horizontal">
+
+                        <!-- Botón de Configuración -->
+                        <Button
+                            android:id="@+id/btn_configuracion"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            android:backgroundTint="@color/primary_500"
+                            android:drawableStart="@android:drawable/ic_menu_preferences"
+                            android:drawableTint="@color/white"
+                            android:gravity="center"
+                            android:text="Meta de ingresos"
+                            android:textColor="@color/button_text" />
+
+                        <!-- Botón de Ayuda -->
+                        <Button
+                            android:id="@+id/btn_ayuda"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            android:backgroundTint="@color/primary_700"
+                            android:drawableStart="@android:drawable/ic_menu_info_details"
+                            android:drawableTint="@color/white"
+                            android:gravity="center"
+                            android:text="@string/ayuda"
+                            android:textColor="@color/button_text" />
+                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
